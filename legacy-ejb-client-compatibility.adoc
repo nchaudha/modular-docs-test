@@ -1,0 +1,33 @@
+[[legacy_ejb_client_compatibility]]
+= Legacy EJB Client Compatibility
+
+{ProductShortName} provides the EJB client library as the primary API to invoke remote EJB components.
+
+{ProductShortName} 7.1 ships with two EJB clients:
+
+* EJB client: The regular EJB client is not fully backward compatible.
+* Legacy EJB client: The legacy EJB client provides binary backward compatibility. This legacy EJB client can run with the client applications that were initially compiled using the EJB client from {ProductShortName} 7.0. All the APIs that were present in the EJB client for {ProductShortName} 7.0 are present in the legacy EJB client for {ProductShortName} 7.1.
+
+You can use the legacy EJB client compatibility by including the following Maven dependency in your configuration.
+
+[source,xml,options="nowrap",subs="+quotes"]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.eap</groupId>
+            <artifactId>wildfly-ejb-client-legacy-bom</artifactId>
+            <version>__EAP_BOM_VERSION__</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+<dependencies>
+    <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-ejb-client-legacy</artifactId>
+    </dependency>
+</dependencies>
+----
+You must use the __EAP_BOM_VERSION__ that is available in the {ProductShortName} Maven repository. 

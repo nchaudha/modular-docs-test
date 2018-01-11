@@ -1,0 +1,58 @@
+[[delivery_groups]]
+= Delivery Groups
+
+Delivery groups provide a way to manage the `delivery-active` state for a group of MDBs. Every MDB belonging to a delivery group has delivery active if and only if that group is active, and has delivery inactive whenever the group is not active.
+
+You can add a delivery group to the `ejb3` subsystem using either the XML configuration or the management CLI.
+
+[discrete]
+== Configuring Delivery Group in the jboss-ejb3.xml File
+
+[source,xml,options="nowrap"]
+----
+<delivery>
+  <ejb-name>MdbName<ejb-name>
+  <delivery-group>passive</delivery-group>
+</delivery>
+----
+On the server side, `delivery-groups` can be enabled by having their `active` attribute set to `true`, or disabled by having their `active` attribute set to `false`, as shown in the example below:
+
+[source,xml,options="nowrap"]
+----
+<delivery-groups>
+  <delivery-group name="group" active="true"/>
+</delivery-groups>
+----
+
+[discrete]
+== Configuring Delivery Group Using the Management CLI
+
+The state of `delivery-groups` can be updated using the management CLI. For example:
+
+[options="nowrap"]
+----
+/subsystem=ejb3/mdb-delivery-group=group:add
+/subsystem=ejb3/mdb-delivery-group=group:remove
+/subsystem=ejb3/mdb-delivery-group=group:write-attribute(name=active,value=true)
+----
+
+When you set the delivery active in the `jboss-ejb3.xml` file or using the annotation, it persists on server restart. However, when you use the management CLI to stop or start the delivery, it does not persist on server restart.
+
+[discrete]
+== Configuring Delivery Group Using Annotations
+
+You can use the `org.jboss.ejb3.annotation.DeliveryGroup` annotation on each MDB class belonging to a group:
+
+[source,java,options="nowrap"]
+----
+@MessageDriven(name = "HelloWorldQueueMDB", activationConfig = {
+ @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+ @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/HELLOWORLDMDBQueue"),
+ @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+ 
+@DeliveryGroup(“group2”)
+ 
+public class HelloWorldMDB implements MessageListener {
+    ...
+}
+----

@@ -1,0 +1,197 @@
+[[activation_configuration_properties]]
+= Activation Configuration Properties
+
+[[configuring_mdbs_using_annotations]]
+== Configuring MDBs Using Annotations
+
+
+You can configure activation properties by using the `@MessageDriven` element and sub-elements which correspond to the `@ActivationConfigProperty` annotation.
+`@ActivationConfigProperty` is an array of activation configuration properties for MDBs. The `@ActivationConfigProperty` annotation specification is as follows:
+
+[source,java,options="nowrap"]
+----
+@Target(value={})
+@Retention(value=RUNTIME)
+public @interface ActivationConfigProperty
+{
+	String propertyName();
+	String propertyValue();
+}
+----
+
+.Example showing `@ActivationConfigProperty`
+[source,java,options="nowrap"]
+----
+@MessageDriven(name="MyMDBName",
+activationConfig =
+{
+    @ActivationConfigProperty(propertyName="destinationLookup",propertyValue="queueA"),
+    @ActivationConfigProperty(propertyName = "destinationType",propertyValue = "javax.jms.Queue"),
+    @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge"),
+})
+----
+
+
+[[configuring_mdbs_using_deployment_descriptor]]
+== Configuring MDBs Using a Deployment Descriptor
+
+The `<message-driven>` element in the `ejb-jar.xml` defines the bean as an MDB. The `<activation-config>` and elements contain the MDB configuration via the `activation-config-property` elements.
+
+
+.Example `ejb-jar.xml`
+[source,xml,options="nowrap"]
+----
+<?xml version="1.1" encoding="UTF-8"?>
+<jboss:ejb-jar xmlns:jboss="http://www.jboss.com/xml/ns/javaee"
+               xmlns="http://java.sun.com/xml/ns/javaee"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd"
+               version="3.1">
+    <enterprise-beans>
+        <message-driven>
+            <ejb-name>MyMDBName</ejb-name>
+            <ejb-class>org.jboss.tutorial.mdb_deployment_descriptor.bean.MyMDBName</ejb-class>
+            <activation-config>
+                <activation-config-property>
+                    <activation-config-property-name>destinationLookup</activation-config-property-name>
+                    <activation-config-property-value>queueA</activation-config-property-value>
+                </activation-config-property>
+                <activation-config-property>
+                    <activation-config-property-name>destinationType</activation-config-property-name>
+                    <activation-config-property-value>javax.jms.Queue</activation-config-property-value>
+                </activation-config-property>
+                <activation-config-property>
+                    <activation-config-property-name>acknowledgeMode</activation-config-property-name>
+                    <activation-config-property-value>Auto-acknowledge</activation-config-property-value>
+                </activation-config-property>
+            </activation-config>
+        </message-driven>
+    <enterprise-beans>
+</jboss:ejb-jar>
+----
+.Activation Configuration Properties Defined by JMS Specifications
+[cols="30%,70",options="header"]
+|====
+|Name |Description
+
+|`destinationLookup` |The JNDI name of the queue or topic. This is a mandatory value.
+|`connectionFactoryLookup` |The lookup name of an administratively defined `javax.jms.ConnectionFactory`, `javax.jms.QueueConnectionFactory` or `javax.jms.TopicConnectionFactory` object that will be used to connect to the JMS provider from which the endpoint would receive messages.
+
+If not defined explicitly, pooled connection factory with name `activemq-ra` is used.
+|`destinationType` |The type of destination valid values are `javax.jms.Queue` or `javax.jms.Topic`. This is a mandatory value.
+|`messageSelector` |The value for a `messageSelector` property is a string which is used to select a subset of the available messages. Its syntax is based on a subset of the SQL 92 conditional expression syntax and is described in detail in JMS specification. Specifying a value for the `messageSelector` property on the `ActivationSpec` JavaBean is optional.
+|`acknowledgeMode` |The type of acknowledgement when not using transacted JMS. Valid values are `Auto-acknowledge` or `Dups-ok-acknowledge`. This is not a mandatory value.
+
+The default value is `Auto-acknowledge`.
+|`clientID` |The client ID of the connection. This is not a mandatory value.
+|`subscriptionDurability` |Whether topic subscriptions are durable. Valid values are `Durable` or `NonDurable`. This is not a mandatory value.
+
+The default value is `NonDurable`.
+|`subscriptionName` |The subscription name of the topic subscription. This is not a mandatory value.
+|====
+
+.Activation Configuration Properties Defined by {ProductShortName}
+[cols="30%,70%",options="header"]
+|====
+|Name |Description
+|`destination` |Using this property with `useJNDI=true` has the same meaning as `destinationLookup`. Using it with `useJNDI=false`, the destination is not looked up, but it is instantiated. You can use this property instead of `destinationLookup`. This is not a mandatory value.
+|`shareSubscriptions` |Whether the connection is configured to share subscriptions.
+
+The default value is `False`.
+|`user` |The user for the JMS connection. This is not a mandatory value.
+|`password` |The password for the JMS connection. This is not a mandatory value.
+|`maxSession` |The maximum number of concurrent sessions to use. This is not a mandatory value.
+
+The default value is `15`.
+|`transactionTimeout` |The transaction timeout for the session in milliseconds. This is not a mandatory value.
+
+If not specified or 0, the property is ignored and the `transactionTimeout` is not overridden and the default `transactionTimeout` defined in the Transaction Manager is used.
+|`useJNDI` |Whether or not use JNDI to look up the destination.
+
+The default value is `True`.
+|`jndiParams` |The JNDI parameters to use in the connection. Parameters are defined as `name=value` pairs separated by `;`
+|`localTx` |Use local transaction instead of XA.
+
+The default value is `False`.
+|`setupAttempts` |Number of attempts to setup a JMS connection. It is possible that the MDB is deployed before the JMS resources are available. In that case, the resource adapter will try to set up several times until the resources are available. This applies only to inbound connections.
+
+The default value is `-1`.
+|`setupInterval` |Interval in milliseconds between consecutive attempts to setup a JMS connection. This applies only to inbound connections.
+
+The default value is `2000`.
+|`rebalanceConnections` |Whether rebalancing of inbound connections is enabled or not. This parameter allows for rebalancing of all inbound connections when the underlying cluster topology changes.
+
+There is no rebalancing for outbound connections.
+
+The default value is `False`.
+|====
+
+[[some_example_use_cases_for_MDB]]
+== Some Example Use Cases for Configuring MDBs
+* Use case for an MDB receiving a message
++
+For a basic scenario when MDB receives a message, see the `helloworld-mdb` quickstart that is shipped with {ProductShortName}.
+
+* Use case for an MDB sending a message
++
+After processing the message you may need to inform other business systems or reply to the message. In this case, you can send the message from MDB as shown in the snippet below:
++
+[source,java,options="nowrap"]
+----
+package org.jboss.as.quickstarts.mdb;
+
+import javax.annotation.Resource;
+import javax.ejb.ActivationConfigProperty;
+import javax.ejb.MessageDriven;
+import javax.inject.Inject;
+import javax.jms.JMSContext;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageListener;
+import javax.jms.Queue;
+
+@MessageDriven(name = "MyMDB", activationConfig = {
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "queue/MyMDBRequest"),
+    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+    @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+public class MyMDB implements MessageListener {
+
+    @Inject
+    private JMSContext jmsContext;
+
+    @Resource(lookup = "java:/queue/ResponseDefault")
+    private Queue defaultDestination;
+
+    /**
+     * @see MessageListener#onMessage(Message)
+     */
+    public void onMessage(Message rcvMessage) {
+        try {
+            Message response = jmsContext.createTextMessage("Response for message " + rcvMessage.getJMSMessageID());
+            if (rcvMessage.getJMSReplyTo() != null) {
+                jmsContext.createProducer().send(rcvMessage.getJMSReplyTo(), response);
+            } else {
+                jmsContext.createProducer().send(defaultDestination, response);
+            }
+        } catch (JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+----
++
+In the example above, after the MDB receives the message, it replies to either the destination specified in `JMSReplyTo` or the destination which is bound to the JNDI name `java:/queue/ResponseDefault`.
+
+* Use case for an MDB configuring rebalancing of inbound connection
++
+[source,java,options="nowrap"]
+----
+@MessageDriven(name="MyMDBName",
+    activationConfig =
+    {
+        @ActivationConfigProperty(propertyName = "destinationType",propertyValue = "javax.jms.Queue"),
+        @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "queueA"),
+        @ActivationConfigProperty(propertyName = "rebalanceConnections", propertyValue = "true")
+    }
+)
+----

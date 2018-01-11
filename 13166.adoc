@@ -1,0 +1,199 @@
+[[change_the_security_context_identity]]
+= Change the Security Context Identity
+
+
+By default, when you make a remote call to an EJB that is deployed to the application server, the connection to the server is authenticated and any subsequent requests that use the connection are executed using the original authenticated identity. This is true for both client-to-server and server-to-server calls. If you need to use different identities from the same client, normally you must open multiple connections to the server so that each one is authenticated as a different identity. Rather than open multiple client connections, you can give permission to the authenticated user to switch identities and execute a request on the existing connection as a different user.
+
+Interceptors created and configured on the server-side are referred to as container interceptors. Interceptors created and configured on the client-side are referred to as client interceptors. To change the identity of a secured connection, you must create and configure the following three components.
+
+* xref:create_and_configure_the_client_interceptor[Client Interceptor]
+* xref:create_and_configure_the_container_intercepter[Container Interceptor]
+* xref:create_the_jaas_loginmodule[JAAS LoginModule]
+
+The abridged code examples that follow are taken from the `ejb-security-interceptors` quickstart that ships with {ProductShortName}. This quickstart is a simple Maven project that provides a working example of how to switch identities on an existing connection.
+
+[discrete]
+[[create_and_configure_the_client_interceptor]]
+== Create and Configure the Client Interceptor
+
+. Create the client interceptor.
++
+The client interceptor must implement the `org.jboss.ejb.client.EJBClientInterceptor` interface. The interceptor must pass the requested identity through the context data map, which can be obtained by using a call to `EJBClientInvocationContext.getContextData()`. The following is an example of a client interceptor that switches identities.
++
+.Client Interceptor Code Example
+[source,java,options="nowrap"]
+----
+public class ClientSecurityInterceptor implements EJBClientInterceptor {
+
+    public void handleInvocation(EJBClientInvocationContext context) throws Exception {
+        Principal currentPrincipal = SecurityActions.securityContextGetPrincipal();
+
+        if (currentPrincipal != null) {
+            Map<String, Object> contextData = context.getContextData();
+            contextData.put(ServerSecurityInterceptor.DELEGATED_USER_KEY, currentPrincipal.getName());
+        }
+        context.sendRequest();
+    }
+
+    public Object handleInvocationResult(EJBClientInvocationContext context) throws Exception {
+        return context.getResult();
+    }
+}
+----
+
+. Configure the client interceptor.
++
+An application can insert a client interceptor into the `EJBClientContext`  interceptor chain programmatically or by using the service loader mechanism. For instructions to configure a client interceptor, see xref:use_a_client_interceptor_in_an_application[Use a Client Interceptor in an Application].
+
+[discrete]
+[[create_and_configure_the_container_intercepter]]
+== Create and Configure the Container Interceptor
+
+Container interceptor classes are simple Plain Old Java Objects (POJOs). They use the `@javax.annotation.AroundInvoke` annotation to mark the method that should be invoked during the invocation on the bean. For more information about container interceptors, see xref:about_container_interceptors[About Container Interceptors].
+
+. Create the container interceptor.
++
+This interceptor receives the `InvocationContext` containing the identity and makes the request to switch to that new identity. The following is an abridged version of the actual code example:
++
+.Container Interceptor Code Example
+[source,java,options="nowrap"]
+----
+public class ServerSecurityInterceptor {
+
+    private static final Logger logger = Logger.getLogger(ServerSecurityInterceptor.class);
+
+    static final String DELEGATED_USER_KEY = ServerSecurityInterceptor.class.getName() + ".DelegationUser";
+
+    @AroundInvoke
+    public Object aroundInvoke(final InvocationContext invocationContext) throws Exception {
+        Principal desiredUser = null;
+        UserPrincipal connectionUser = null;
+
+        Map<String, Object> contextData = invocationContext.getContextData();
+        if (contextData.containsKey(DELEGATED_USER_KEY)) {
+            desiredUser = new SimplePrincipal((String) contextData.get(DELEGATED_USER_KEY));
+
+            Collection<Principal> connectionPrincipals = SecurityActions.getConnectionPrincipals();
+
+            if (connectionPrincipals != null) {
+                for (Principal current : connectionPrincipals) {
+                    if (current instanceof UserPrincipal) {
+                        connectionUser = (UserPrincipal) current;
+                        break;
+                    }
+                }
+
+            } else {
+                throw new IllegalStateException("Delegation user requested but no user on connection found.");
+            }
+        }
+
+
+        ContextStateCache stateCache = null;
+        try {
+            if (desiredUser != null && connectionUser != null
+                && (desiredUser.getName().equals(connectionUser.getName()) == false)) {
+                // The final part of this check is to verify that the change does actually indicate a change in user.
+                try {
+                    // We have been requested to use an authentication token
+                    // so now we attempt the switch.
+                    stateCache = SecurityActions.pushIdentity(desiredUser, new OuterUserCredential(connectionUser));
+                } catch (Exception e) {
+                    logger.error("Failed to switch security context for user", e);
+                    // Don't propagate the exception stacktrace back to the client for security reasons
+                    throw new EJBAccessException("Unable to attempt switching of user.");
+                }
+            }
+
+            return invocationContext.proceed();
+        } finally {
+            // switch back to original context
+            if (stateCache != null) {
+                SecurityActions.popIdentity(stateCache);;
+            }
+        }
+    }
+----
+
+. Configure the container interceptor.
++
+For information on how to configure container interceptors, see xref:configure_a_container_interceptor[Configure a Container Interceptor].
+
+[discrete]
+[[create_the_jaas_loginmodule]]
+== Create the JAAS LoginModule
+
+The JAAS LoginModule component is responsible for verifying that the user is allowed to execute requests as the requested identity. The following abridged code example shows the methods that perform the login and validation:
+
+.LoginModule Code Example
+[source,java,options="nowrap"]
+----
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean login() throws LoginException {
+        if (super.login() == true) {
+            log.debug("super.login()==true");
+            return true;
+        }
+
+        // Time to see if this is a delegation request.
+        NameCallback ncb = new NameCallback("Username:");
+        ObjectCallback ocb = new ObjectCallback("Password:");
+
+        try {
+            callbackHandler.handle(new Callback[] { ncb, ocb });
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            // If the CallbackHandler can not handle the required callbacks then no chance.
+            return false;
+        }
+
+        String name = ncb.getName();
+        Object credential = ocb.getCredential();
+
+        if (credential instanceof OuterUserCredential) {
+            // This credential type will only be seen for a delegation request, if not seen then the request is not for us.
+
+            if (delegationAcceptable(name, (OuterUserCredential) credential)) {
+                identity = new SimplePrincipal(name);
+                if (getUseFirstPass()) {
+                    String userName = identity.getName();
+                    if (log.isDebugEnabled())
+                        log.debug("Storing username '" + userName + "' and empty password");
+                    // Add the username and an empty password to the shared state map
+                    sharedState.put("javax.security.auth.login.name", identity);
+                    sharedState.put("javax.security.auth.login.password", "");
+                }
+                loginOk = true;
+                return true;
+            }
+        }
+        return false; // Attempted login but not successful.
+    }
+
+    // Make a trust user to decide if the user switch is acceptable.
+    protected boolean delegationAcceptable(String requestedUser, OuterUserCredential connectionUser) {
+    if (delegationMappings == null) {
+        return false;
+    }
+
+    String[] allowedMappings = loadPropertyValue(connectionUser.getName(), connectionUser.getRealm());
+    if (allowedMappings.length == 1 && "*".equals(allowedMappings[0])) {
+        // A wild card mapping was found.
+        return true;
+    }
+    for (String current : allowedMappings) {
+        if (requestedUser.equals(current)) {
+            return true;
+        }
+    }
+    return false;
+}
+----
+
+[NOTE]
+====
+See the `ejb-security-interceptors` quickstart `README.html` file for complete instructions and more detailed information about the code examples.
+====

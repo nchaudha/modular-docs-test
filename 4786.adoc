@@ -1,0 +1,11 @@
+[[about_remote_ejb_access_using_ssl_encryption]]
+= About Remote EJB Access Using SSL Encryption
+
+By default, the network traffic for Remote Method Invocation (RMI) of
+EJB2 and EJB3 Beans is not encrypted. In instances where encryption is
+required, Secure Sockets Layer (SSL) can be utilized so that the
+connection between the client and server is encrypted. Using SSL also
+has the added benefit of allowing the network traffic to traverse some
+firewalls, depending on the firewall configuration.
+
+include::warning-upgrade-to-tls-1-1.adoc[]

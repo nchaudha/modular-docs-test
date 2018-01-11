@@ -1,0 +1,143 @@
+[[use_ejb_method_permissions]]
+= Use EJB Method Permissions
+
+The `<method-permission>` element defines the logical roles that are
+allowed to access the EJB methods defined by `<method>` elements. Several
+examples demonstrate the syntax of the xml. Multiple method permission
+statements may be present, and they have a cumulative effect. The
+`<method-permission>` element is a child of the `<assembly-descriptor>`
+element of the `<ejb-jar>` descriptor.
+
+The XML syntax is an alternative to using annotations for EJB method
+permissions.
+
+.Example: Allow Roles to Access All Methods of an EJB
+[source,xml,options="nowrap"]
+----
+<method-permission>
+  <description>The employee and temp-employee roles may access any method
+  of the EmployeeService bean </description>
+  <role-name>employee</role-name>
+  <role-name>temp-employee</role-name>
+  <method>
+    <ejb-name>EmployeeService</ejb-name>
+    <method-name>*</method-name>
+  </method>
+</method-permission>
+----
+
+.Example: Allow Roles to Access Certain Methods of an EJB and Limit Method Parameters
+[source,xml,options="nowrap"]
+----
+<method-permission>
+  <description>The employee role may access the findByPrimaryKey,
+  getEmployeeInfo, and the updateEmployeeInfo(String) method of
+  the AcmePayroll bean </description>
+  <role-name>employee</role-name>
+  <method>
+    <ejb-name>AcmePayroll</ejb-name>
+    <method-name>findByPrimaryKey</method-name>
+  </method>
+  <method>
+    <ejb-name>AcmePayroll</ejb-name>
+    <method-name>getEmployeeInfo</method-name>
+  </method>
+  <method>
+    <ejb-name>AcmePayroll</ejb-name>
+    <method-name>updateEmployeeInfo</method-name>
+    <method-params>
+      <method-param>java.lang.String</method-param>
+    </method-params>
+  </method>
+</method-permission>
+----
+
+.Example: Allow Any Authenticated User to Access Methods of EJBs
+Using the `<unchecked/>` element allows any authenticated user to use the
+specified methods.
+
+[source,xml,options="nowrap"]
+----
+<method-permission>
+  <description>Any authenticated user may access any method of the
+  EmployeeServiceHelp bean</description>
+  <unchecked/>
+  <method>
+    <ejb-name>EmployeeServiceHelp</ejb-name>
+    <method-name>*</method-name>
+  </method>
+</method-permission>
+----
+
+.Example: Completely Exclude Specific EJB Methods
+[source,xml,options="nowrap"]
+----
+<exclude-list>
+  <description>No fireTheCTO methods of the EmployeeFiring bean may be
+  used in this deployment</description>
+  <method>
+    <ejb-name>EmployeeFiring</ejb-name>
+    <method-name>fireTheCTO</method-name>
+  </method>
+</exclude-list>
+----
+
+.Example:  A Complete `<assembly-descriptor>` Containing Several `<method-permission>` Blocks
+[source,xml,options="nowrap"]
+----
+<ejb-jar>
+    <assembly-descriptor>
+        <method-permission>
+            <description>The employee and temp-employee roles may access any method of the EmployeeService bean </description>
+            <role-name>employee</role-name>
+            <role-name>temp-employee</role-name>
+            <method>
+                <ejb-name>EmployeeService</ejb-name>
+                <method-name>*</method-name>
+            </method>
+        </method-permission>
+        <method-permission>
+            <description>The employee role may access the findByPrimaryKey, getEmployeeInfo, and the updateEmployeeInfo(String) method of the AcmePayroll bean </description>
+            <role-name>employee</role-name>
+            <method>
+                <ejb-name>AcmePayroll</ejb-name>
+                <method-name>findByPrimaryKey</method-name>
+            </method>
+            <method>
+                <ejb-name>AcmePayroll</ejb-name>
+                <method-name>getEmployeeInfo</method-name>
+            </method>
+            <method>
+                <ejb-name>AcmePayroll</ejb-name>
+                <method-name>updateEmployeeInfo</method-name>
+                <method-params>
+                    <method-param>java.lang.String</method-param>
+                </method-params>
+            </method>
+        </method-permission>
+        <method-permission>
+            <description>The admin role may access any method of the EmployeeServiceAdmin bean </description>
+            <role-name>admin</role-name>
+            <method>
+                <ejb-name>EmployeeServiceAdmin</ejb-name>
+                <method-name>*</method-name>
+            </method>
+        </method-permission>
+        <method-permission>
+            <description>Any authenticated user may access any method of the EmployeeServiceHelp bean</description>
+            <unchecked/>
+            <method>
+                <ejb-name>EmployeeServiceHelp</ejb-name>
+                <method-name>*</method-name>
+            </method>
+        </method-permission>
+        <exclude-list>
+            <description>No fireTheCTO methods of the EmployeeFiring bean may be used in this deployment</description>
+            <method>
+                <ejb-name>EmployeeFiring</ejb-name>
+                <method-name>fireTheCTO</method-name>
+            </method>
+        </exclude-list>
+    </assembly-descriptor>
+</ejb-jar>
+----

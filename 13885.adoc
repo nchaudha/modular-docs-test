@@ -1,0 +1,14 @@
+[[about_container_interceptors]]
+= About Container Interceptors
+
+Standard Java EE interceptors, as defined by the https://jcp.org/en/jsr/detail?id=345[JSR 345, Enterprise JavaBeans 3.2] specification, are expected to run after the container has completed security context propagation, transaction management, and other container provided invocation processing. This is a problem if the application must intercept a call before a specific container interceptor is run.
+
+[discrete]
+== Positioning of the Container Interceptor in the Interceptor Chain
+
+The container interceptors configured for an EJB are guaranteed to be run before the {ProductShortName} provided security interceptors, transaction management interceptors, and other server provided interceptors. This allows specific application container interceptors to process or configure relevant context data before the invocation proceeds.
+
+[discrete]
+== Differences Between the Container Interceptor and the Java EE Interceptor API
+
+Although container interceptors are modeled to be similar to Java EE interceptors, there are some differences in the semantics of the API. For example, it is illegal for container interceptors to invoke the `javax.interceptor.InvocationContext.getTarget()` method because these interceptors are invoked long before the EJB components are set up or instantiated.

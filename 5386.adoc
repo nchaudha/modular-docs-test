@@ -1,0 +1,22 @@
+[[add_a_deployment_descriptor_to_an_EJB_project]]
+= Add a Deployment Descriptor to an EJB Project
+
+An EJB deployment descriptor can be added to an EJB project that was created without one. To do this, follow the procedure below.
+
+[discrete]
+== Prerequisites
+* You have a EJB project in Red Hat JBoss Developer Studio to which you want to add an EJB deployment descriptor.
+
+[discrete]
+== Add a Deployment Descriptor to an EJB Project
+
+. Open the project in Red Hat JBoss Developer Studio.
+
+. Add a deployment descriptor.
++
+Right-click on the *Deployment Descriptor* folder in the project view and select *Generate Deployment Descriptor* tab.
++
+.Adding a Deployment Descriptor
+image::49.png[Adding a Deployment Descriptor]
++
+The new file, `ejb-jar.xml`, is created in `ejbModule/META-INF/`. Double-click on the *Deployment Descriptor* folder in the project view to open this file.

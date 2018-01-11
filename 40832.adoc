@@ -1,0 +1,59 @@
+[[standalone_and_in_server_client_configuration]]
+= Standalone and In-server Client Configuration
+
+NOTE: The use of the `jboss-ejb-client.properties` file is deprecated in favor of the `wildfly-config.xml` file.
+
+To connect an EJB client to a clustered EJB application, you need to expand the existing configuration in standalone EJB client or in-server EJB client to include cluster connection configuration. The `jboss-ejb-client.properties` for standalone EJB client, or even `jboss-ejb-client.xml` file for a server-side application must be expanded to include a cluster configuration.
+
+[NOTE]
+====
+An EJB client is any program that uses an EJB on a remote server. A client is `in-server` when the EJB client calling the remote server is itself running inside of a server. In other words, a {ProductShortName} instance calling out to another {ProductShortName} instance would be considered an in-server client.
+====
+
+This example shows the additional cluster configuration required for a standalone EJB client.
+
+[source,xml,options="nowrap"]
+----
+remote.clusters=ejb
+remote.cluster.ejb.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+remote.cluster.ejb.connect.options.org.xnio.Options.SSL_ENABLED=false
+remote.cluster.ejb.username=test
+remote.cluster.ejb.password=password
+----
+
+If an application uses the remote-outbound-connection, you need to configure the `jboss-ejb-client.xml` file and add cluster configuration as shown in the following example:
+
+[source,xml,options="nowrap"]
+----
+<jboss-ejb-client xmlns:xsi="urn:jboss:ejb-client:1.2" xsi:noNamespaceSchemaLocation="jboss-ejb-client_1_2.xsd">
+  <client-context>
+    <ejb-receivers>
+      <!-- this is the connection to access the app-one -->
+      <remoting-ejb-receiver outbound-connection-ref="remote-ejb-connection-1" />
+      <!-- this is the connection to access the app-two -->
+      <remoting-ejb-receiver outbound-connection-ref="remote-ejb-connection-2" />
+    </ejb-receivers>
+
+    <!-- If an outbound connection connects to a cluster,
+             a list of members is provided after successful connection. 
+         To connect to this node this cluster element must be defined. -->
+
+    <clusters>
+      <!-- cluster of remote-ejb-connection-1 -->
+      <cluster name="ejb" security-realm="ejb-security-realm-1" username="quickuser1">
+        <connection-creation-options>
+        <property name="org.xnio.Options.SSL_ENABLED" value="false" />
+        <property name="org.xnio.Options.SASL_POLICY_NOANONYMOUS" value="false" />
+        </connection-creation-options>
+      </cluster>
+    </clusters>
+  </client-context>
+</jboss-ejb-client>
+----
+
+For more information about remote-outbound-connection, see link:{LinkConfigGuide}#about_the_remoting_subsystem[About the Remoting Subsystem] in the {ProductShortName} _Configuration Guide_.
+
+[NOTE]
+====
+For a secure connection you need to add the credentials to cluster configuration in order to avoid an authentication exception.
+====

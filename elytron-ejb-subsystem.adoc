@@ -1,0 +1,55 @@
+[[elytron_integration_ejb_subsystem]]
+= Elytron Integration with the EJB Subsystem
+
+Starting with {ProductShortName} 7.1, it is now possible to map deployments so that their security is handled by the `elytron` subsystem. If a deployment references a mapped security domain, its security will be handled by Elytron, otherwise its security will be handled by the legacy security subsystem. This mapping is defined in the `ejb` subsystem.
+
+Within the `ejb` subsystem, mappings are created from a security domain name, as referenced within a deployment, to a referenced Elytron security-domain. When a mapped security domain name is configured for a bean in a deployment, this indicates that security should be handled by Elytron. New EJB security interceptors are set up instead of the existing ones.
+
+The new EJB security interceptors make use of the Elytron `SecurityDomain` associated with the invocation to obtain the current `SecurityIdentity` and perform the following tasks:
+
+* Establish the `run-as` principal.
+* Create any extra roles for the `run-as` principal.
+* Create the `run-as` roles.
+* Make authorization decisions.
+
+{ProductShortName} 7.1 introduces a new management resource in the `ejb` subsystem, `application-security-domains`. The `application-security-domains` element contains the application security domains that should be mapped to an Elytron security domain.
+
+
+.Attributes of the application-security-domain
+[cols="30%,70",options="header"]
+|====
+|Attribute  |Description
+|`name` | This attribute refers to the name of the security domain as specified in a deployment.
+|`security-domain` | This attribute is a reference to the Elytron security domain that should be used.
+|`enable-jacc` | This attribute enables authorization using JACC.
+|`referencing-deployments` | This is a runtime attribute that lists all deployments currently referencing the ASD.
+|====
+
+You can configure the `application-security-domain` in the `ejb` subsystem in either of the following ways. You can xref:configure_the_application_security_domain_using_the_management_console[use the management console], or you can xref:configure_the_application_security_domain_using_the_management_cli[use the management CLI].
+
+[[configure_the_application_security_domain_using_the_management_console]]
+== Configure the Application Security Domain Using the Management Console
+
+. Access the management console. For more information, see link:{LinkConfigGuide}#management_console_overview[Management Console] in the {ProductShortName} _{ConfigBookName}_.
+
+. Navigate to *Configuration* -> *Subsystems* -> *EJB 3* -> click *View*.
+
+. In the *Container* tab, select *Security Domains Mapping*.
+
+[[configure_the_application_security_domain_using_the_management_cli]]
+== Configure the Application Security Domain Using the Management CLI
+
+In the following example,  `MyAppSecurity` is a security domain that is referenced in the deployment and `ApplicationDomain` is an Elytron security domain that has been configured in the `elytron` subsystem.
+
+[source,option="nowrap"]
+----
+/subsystem=ejb3/application-security-domain=MyAppSecurity:add(security-domain=ApplicationDomain)
+----
+
+The following XML is added to the `ejb` subsystem of the server configuration file as a result of this command.
+[source,xml,options="nowrap"]
+----
+<application-security-domains>
+    <application-security-domain name="MyAppSecurity" security-domain="ApplicationDomain"/>
+</application-security-domains>
+----

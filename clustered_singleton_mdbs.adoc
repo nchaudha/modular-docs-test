@@ -1,0 +1,69 @@
+[[clustered_singleton_mdbs]]
+= Clustered Singleton MDBs
+
+When an MDB is identified as a clustered singleton and is deployed in a cluster, only one node is active. This node can consume messages serially. When the server node fails, the active node from the clustered singleton MDBs starts consuming the messages.
+
+[discrete]
+= Identify an MDB as a Clustered Singleton
+You can use one of the following procedures to identify an MDB as a clustered singleton.
+
+* Use the clustered-singleton XML element as shown in the example below:
++
+[source,xml,options="nowrap"]
+----
+<jboss:ejb-jar xmlns:jboss="http://www.jboss.com/xml/ns/javaee"
+xmlns="http://java.sun.com/xml/ns/javaee"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xmlns:c="urn:clustering:1.1"
+xmlns:d="urn:delivery:1.1"
+xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd"
+version="3.1"
+impl-version="2.0">
+    <c:clustering>
+        <ejb-name>HelloWorldQueueMDB</ejb-name>
+        <c:clustered-singleton>true</c:clustered-singleton>
+    </c:clustering>
+</jboss:ejb-jar>
+----
++
+* In your MDB class, use the `@org.jboss.ejb3.annotation.ClusteredSingleton`. This procedure requires no extra configuration at the server. You need to run the service in a clustered environment. 
+
+[NOTE]
+====
+You have to activate the `delivery-group` in the entire cluster, specifically, in all nodes of the cluster, because you do not know which node of the cluster is chosen to be the `singleton master`. If the server chooses a node to be `singleton master`, and that node does not have the required `delivery-group` activated, no node in the cluster receives the messages.
+====
+
+The `messaging-clustering-singleton` quickstart, which ships with {ProductShortName}, demonstrates the use of clustering with integrated Apache ActiveMQ Artemis. It uses the same source code as the `helloworld-mdb` quickstart, with a difference only in the configuration to run it as a clustered singleton. There are two JMS resources contained in this quickstart:
+
+* A queue named `HELLOWORLDMDBQueue` bound in the JNDI as `java:/queue/HELLOWORLDMDBQueue`
+* A topic named `HELLOWORLDMDBTopic` bound in the JNDI as `java:/topic/HELLOWORLDMDBTopic`
+
+Both contain a singleton configuration as specified in the `jboss-ejb3.xml` file:
+
+[source,xml,options="nowrap"]
+----
+<c:clustering>
+    <ejb-name>*</ejb-name>
+    <c:clustered-singleton>true</c:clustered-singleton>
+</c:clustering>
+----
+
+The wildcard asterisk `*` in the `<ejb-name>` element indicates that all the MDBs contained in the application will be clustered singleton. As a result, only one node in the cluster will have those MDBs active at a specific time. If this active node shuts down, another node in the cluster will become the active node with the MDBs, which then becomes the singleton provider.
+
+You can also find a configuration for the delivery group in the `jboss-ejb3.xml` file:
+
+[source,xml,options="nowrap"]
+----
+<d:delivery>
+    <ejb-name>HelloWorldTopicMDB</ejb-name>
+    <d:group>my-mdb-delivery-group</d:group>
+</d:delivery>
+----
+
+In this case, only one of the MDBs, `HelloWorldTopicMDB`, is associated with a delivery group. All the delivery groups used by an MDB must be configured in the `ejb3` subsystem configuration. The delivery group can be enabled or disabled. If the delivery group is disabled in a cluster node, all the MDBs belonging to that delivery group become inactive in the respective cluster node. When using the delivery groups in a non-clustered environment, the MDB is active whenever the delivery group is enabled.
+
+If a delivery group is used in conjunction with the singleton provider, the MDB can be active in the singleton provider node only if that node has the delivery group enabled. Otherwise, the MDB will be inactive in that node, and all the other nodes of the cluster.
+
+See the `README.html` file included with this quickstart for detailed instructions about how to configure the server for messaging clustering and to review the code examples.
+
+For information on how to download and use the {ProductShortName} quickstarts, see the link:{LinkGettingStartedGuide}#using_the_quickstart_examples[Using the Quickstart Examples] section in the {ProductShortName} _{GettingStartedBookName}_.

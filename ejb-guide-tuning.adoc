@@ -1,0 +1,4 @@
+[[tuning_ejb_subsystem]]
+= Tuning the EJB 3 Subsystem
+
+For tips on optimizing performance for the `ejb3` subsystem, see the link:{LinkPerformanceTuningGuide}#ejb_subsystem_tuning[EJB Subsystem Tuning] section of the _{PerformanceTuningBookName}_.

@@ -1,0 +1,71 @@
+[[create_an_ear_project_containing_an_ejb_project]]
+= Create an EAR Project Containing an EJB Project
+
+This task describes how to create a new enterprise archive (EAR) project in Red Hat JBoss Developer Studio that contains an EJB project.
+
+[discrete]
+== Prerequisites
+
+* A server and server runtime for {ProductShortName} have been set up.
+//See link:{LinkDevelopmentGuide}#add_the_jboss_eap_server_to_red_hat_jboss_developer_studio[Add the {ProductShortName} Server to JBoss Developer Studio] in the link:{LinkDevelopmentGuide}[Development Guide].
+
+[discrete]
+== Create an EAR Project Containing an EJB Project
+
+. Open the *New Java EE EAR Project* Wizard.
++
+.. Navigate to the *File* menu, select *New*, then select *Project*.
+.. When the *New Project* wizard appears, select *Java EE/Enterprise Application Project* and click *Next*.
+
++
+.New EAR Application Project Wizard
+image::6584.png[New EAR Application Project Wizard]
+
+. Enter the following details:
++
+** *Project name:* The name of the project that appears in Red Hat JBoss Developer Studio, and also the default file name for the deployed EAR file.
+** *Project location:* The directory where the project files will be saved. The default is a directory in the current workspace.
+** *Target runtime:* This is the server runtime used for the project. This will need to be set to the same {ProductShortName} runtime used by the server that you will be deploying to.
+** *EAR version:* This is the version of the Java Enterprise Edition specification that your project will comply with. Red Hat recommends using Java EE 7.
+** *Configuration:* This allows you to adjust the supported features in your project. Use the default configuration for your selected runtime.
++
+Click *Next* to continue.
+
+. Add a new EJB module.
++
+New modules can be added from the *Enterprise Application* page of the wizard. To add a new EJB Project as a module follow the steps below:
+
+.. Click *New Module*, uncheck *Create Default Modules* checkbox, select the *Enterprise Java Bean* and click *Next*. The *New EJB Project wizard* appears.
+.. The *New EJB Project wizard* is the same as the wizard used to create new standalone EJB Projects and is described in xref:create_an_ejb_archive_project_using_red_hat_jboss_developer_studio[Create an EJB Archive Project Using Red Hat JBoss Developer Studio].
++
+The minimum details required to create the project are:
++
+** Project name
+** Target runtime
+** EJB module version
+** Configuration
++
+All the other steps of the wizard are optional. Click *Finish* to complete creating the EJB Project.
++
+The newly created EJB project is listed in the Java EE module
+dependencies and the checkbox is checked.
+
+. Optionally, add an `application.xml` deployment descriptor.
++
+Check the *Generate application.xml deployment descriptor* checkbox if one is required.
+
+. Click *Finish*.
++
+Two new projects will appear: the EJB project and the EAR project.
+
+. Add the build artifact to the server for deployment.
++
+Open the *Add and Remove* dialog by right-clicking in the *Servers* tab on the server you want to deploy the built artifact to in the server tab and then select *Add and Remove*.
++
+Select the EAR resource to deploy from the *Available* column and click the *Add* button. The resource will be moved to the Configured column. Click *Finish* to close the dialog.
+
+.Add and Remove Dialog
+image::51.png[Add and Remove Dialog]
+
+You now have an Enterprise Application Project with a member EJB
+Project. This will build and deploy to the specified server as a single EAR deployment containing an EJB subdeployment.

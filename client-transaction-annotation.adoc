@@ -1,0 +1,29 @@
+[[client_transaction_annotation]]
+== The ClientTransaction Annotation
+
+The `@org.jboss.ejb.client.annotation.ClientTransaction` annotation handles transaction propagation from an EJB client. You can mandate the propagation to fail if the client has no transaction, or prevent the transaction propagation even if the client has one active. You can use the constants of the `org.jboss.ejb.client.annotation.ClientTransactionPolicy` interface to  control the policy of the `ClientTransaction` annotation. The following are the constants of the `org.jboss.ejb.client.annotation.ClientTransactionPolicy` interface:
+
+* MANDATORY: Fail with exception when there is no client-side transaction context; propagate the client-side transaction context when it is present.
+* NEVER: Invoke without propagating any transaction context; if a client-side transaction context is present, an exception is thrown.
+* NOT_SUPPORTED: Invoke without propagating any transaction context whether or not a client-side transaction context is present.
+* SUPPORTS: Invoke without a transaction if there is no client-side transaction context; propagate the client-side transaction context if it is present.
+
+If no annotation is present, the default policy is `org.jboss.ejb.client.annotation.ClientTransactionPolicy#SUPPORTS`, which means that the transaction is propagated if it is present, but the propagation does not fail, regardless of whether a transaction is present or not.
+
+[source,java,options="nowrap"]
+----
+@ClientTransaction(ClientTransactionPolicy.MANDATORY)
+@Remote
+public interface RemoteCalculator  {
+   public void callRemoteEjb() { }
+}
+@Stateless
+@Remote(RemoteCalculator.class)
+public class CalculatorBean implements RemoteCalculator {
+ 
+   @Override
+   public void callRemoteEjb()  {   }
+}
+----
+
+The annotation allows the remote interface provider to tell the remote interface consumer whether transactions are needed for a method.

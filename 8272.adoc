@@ -1,0 +1,68 @@
+[[add_a_new_security_realm]]
+= Add a New Security Realm
+
+. Run the management CLI:
++
+Execute the `jboss-cli.sh` or `jboss-cli.bat` script and connect to the server.
++
+. Create the new security realm itself:
++
+Run the following command to create a new security realm named `MyDomainRealm` on a domain controller or a standalone server.
++
+For a domain instance, use this command:
++
+[options="nowrap"]
+----
+/host=master/core-service=management/security-realm=MyDomainRealm:add()
+----
++
+For a standalone instance, use this command:
++
+[options="nowrap"]
+----
+/core-service=management/security-realm=MyDomainRealm:add()
+----
++
+. Create a properties file named `myfile.properties`:
++
+For a standalone instance, create a file `__EAP_HOME__/standalone/configuration/myfile.properties` and for a domain instance, create a file `__EAP_HOME__/domain/configuration/myfile.properties`. These files need to have read and write access for the file owner.
++
+[options="nowrap"]
+----
+$ chmod 600 myfile.properties
+----
++
+. Create the references to the properties file which will store information about the new role:
++
+Run the following command to create a pointer to the `myfile.properties` file, which will contain the properties pertaining to the
+new role.
++
+[NOTE]
+====
+The properties file will not be created by the included
+`add-user.sh` and `add-user.bat` scripts. It must be created externally.
+====
++
+For a domain instance, use this command:
++
+[options="nowrap"]
+----
+/host=master/core-service=management/security-realm=MyDomainRealm/authentication=properties:add(path=myfile.properties)
+----
++
+For a standalone instance, use this command:
++
+[options="nowrap"]
+----
+/core-service=management/security-realm=MyDomainRealm/authentication=properties:add(path=myfile.properties)
+----
+
+Your new security realm is created. When you add users and roles to this
+new realm, the information will be stored in a separate file from the
+default security realms. You can manage this new file using your own
+applications or procedures.
+
+[NOTE]
+====
+When using the `add-user.sh` script to add a user to a non-default file, other than `application-users.properties`, you have to pass it the argument `--user-properties myfile.properties` otherwise it will try to use `application-users.properties`.
+====

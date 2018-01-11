@@ -1,0 +1,19 @@
+[[message_driven_beans]]
+= Message-Driven Beans
+
+Message-driven Beans (MDBs) provide an event driven model for
+application development. The methods of MDBs are not injected into or invoked from client code but are triggered by the receipt of messages from a messaging service such as a Java Messaging Service (JMS) server. The Java EE specification requires that JMS is supported but  other messaging systems can be supported as well.
+
+MDBs are a special kind of stateless session beans. They implement a method called `onMessage(Message message)`. This method is triggered when a JMS destination on which the MDB is listening receives a message. That is, MDBs are triggered by the receipt of messages from a JMS provider, unlike the stateless session beans where methods are usually called by EJB clients.
+
+MDB processes messages asynchronously. By default each MDB can have up to 16 sessions, where each session processes a message. There are no message order guarantees. In order to achieve message ordering, it is necessary to limit the session pool for the MDB to `1`. 
+
+.Example: Management CLI Commands to Set Session Pool to `1`:
+[source,options="nowrap"]
+----
+/subsystem=ejb3/strict-max-bean-instance-pool=mdb-strict-max-pool:write-attribute(name=derive-size,value=undefined)
+
+/subsystem=ejb3/strict-max-bean-instance-pool=mdb-strict-max-pool:write-attribute(name=max-pool-size,value=1)
+
+:reload
+----

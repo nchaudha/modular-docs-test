@@ -1,0 +1,8 @@
+[[about_clustered_enterprise_javabeans_ejbs]]
+= About Clustered Enterprise JavaBeans (EJBs)
+
+EJB components can be clustered for high-availability scenarios. They use different protocols than HTTP components, so they are clustered in different ways. EJB 2 and 3 stateful and stateless beans can be clustered.
+
+For information on singletons, see {LinkDevelopmentGuide}#clustered_ha_singleton_service[HA Singleton Service] in the {ProductShortName} _Development Guide_
+
+

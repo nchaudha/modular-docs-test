@@ -1,0 +1,22 @@
+[[ejb_jndi_naming_reference]]
+= EJB JNDI Naming Reference
+
+The JNDI lookup name for a session bean uses the following syntax:
+
+[options="nowrap"]
+----
+ejb:<appName>/<moduleName>/<distinctName>/<beanName>!<viewClassName>?stateful
+----
+
+* `<appName>`: If the session bean's JAR file has been deployed within an enterprise archive (EAR) then the `appName` is the name of the respective EAR. By default, the name of an EAR is its file name without the `.ear` suffix. The application name can be overridden in its `application.xml` file. If the session bean is not deployed in an EAR, then leave the `appName` blank.
+* `<moduleName>`: The `moduleName` is the name of the JAR file in which the session bean is deployed. The default name of the JAR file is its file name without the `.jar` suffix. The module name can be overridden in the JAR's `ejb-jar.xml` file.
+* `<distinctName>`: {ProductShortName} allows each deployment to specify an optional distinct name. If the deployment does not have a distinct name, then leave the `distinctName` blank.
+* `<beanName>`: The `beanName` is the simple class name of the session bean to be invoked.
+* `<viewClassName>`: The `viewClassName` is the fully qualified class name of the remote interface. This includes the package name of the interface.
+* `?stateful`: The `?stateful` suffix is required when the JNDI name refers to a stateful session bean. It is not included for other bean types.
+
+For example, if we deployed `hello.jar` having a stateful bean `org.jboss.example.HelloBean` that exposed a remote interface `org.jboss.example.Hello`, then the JNDI lookup name would be:
+[options="nowrap"]
+----
+ejb:/hello/HelloBean!org.jboss.example.Hello?stateful"
+----

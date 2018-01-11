@@ -1,0 +1,43 @@
+[[ejb_invocation_over_http]]
+= EJB Invocation Over HTTP
+
+include::technology-preview-feature-warning.adoc[]
+
+EJB invocation over HTTP includes two distinct parts: the client-side and the server-side implementations.
+
+== Client-side Implementation
+
+The client-side implementation consists of an `EJBReceiver` that uses the Undertow HTTP client to invoke the server. Connection management is handled automatically using a connection pool.
+
+In order to configure an EJB client application to use HTTP transport, you must add the following dependency on the HTTP transport implementation:
+
+[source,xml,options="nowrap"]
+----
+<dependency>
+    <groupId>org.wildfly.wildfly-http-client</groupId>
+    <artifactId>wildfly-http-ejb-client</artifactId>
+</dependency>
+----
+
+To perform the HTTP invocation, you must use the `http` URL scheme and include the context name of the HTTP invoker, `wildfly-services`. For example, if you are using `remote+http://localhost:8080` as the target URL, in order to use the HTTP transport, you must update this to `\http://localhost:8080/wildfly-services`.
+
+== Server-side Implementation
+
+The server-side implementation consists of a service that handles the incoming HTTP requests, unmarshals them and passes the result to the internal EJB invocation code.
+
+In order to configure the server, the `http-invoker` must be enabled on each of the virtual hosts that you wish to use in the `undertow` subsystem. This is enabled by default in the standard configurations. If it is disabled, it can be re-enabled using the following management CLI command:
+
+[source,options="nowrap"]
+----
+/subsystem=undertow/server=default-server/host=default-host/setting=http-invoker:add(http-authentication-factory=myfactory, path='wildfly-services')
+----
+
+`http-invoker` has two attributes: a `path` that defaults to `wildfly-services`, and one of the following:
+
+* An `http-authentication-factory` that must be a reference to an Elytron `http-authentication-factory`, as shown in the above command.
+* A legacy `security-realm`.
+
+Note that the above two attributes are mutually exclusive: you cannot specify both an `http-authentication-factory` and a `security-realm` at the same time.
+
+NOTE: Any deployment that aims to use the `http-authentication-factory` must use Elytron security with the same security domain corresponding to the specified HTTP authentication factory.
+

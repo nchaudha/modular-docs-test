@@ -1,0 +1,64 @@
+[[create_an_ejb_archive_project_in_maven]]
+= Create an EJB Archive Project in Maven
+
+This task demonstrates how to create a project using Maven that contains one or more enterprise beans packaged in a JAR file.
+
+[discrete]
+== Prerequisites
+* Maven is already installed.
+* You understand the basic usage of Maven.
+
+[discrete]
+== Create an EJB Archive Project in Maven
+
+. *Create the Maven project:* An EJB project can be created using Maven's archetype system and the `ejb-javaee7` archetype. To do this run the `mvn` command with parameters as shown:
++
+[source,options="nowrap"]
+----
+$ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeArtifactId=ejb-javaee7
+----
++
+Maven will prompt you for the `groupId`, `artifactId`, `version` and `package` for your project.
++
+[source,options="nowrap"]
+----
+$ mvn archetype:generate -DarchetypeGroupId=org.codehaus.mojo.archetypes -DarchetypeArtifactId=ejb-javaee7
+[INFO] Scanning for projects...
+[INFO]
+[INFO] ------------------------------------------------------------------------
+[INFO] Building Maven Stub Project (No POM) 1
+[INFO] ------------------------------------------------------------------------
+[INFO]
+[INFO] >>> maven-archetype-plugin:2.0:generate (default-cli) @ standalone-pom >>>
+[INFO]
+[INFO] <<< maven-archetype-plugin:2.0:generate (default-cli) @ standalone-pom <<<
+[INFO]
+[INFO] --- maven-archetype-plugin:2.0:generate (default-cli) @ standalone-pom ---
+[INFO] Generating project in Interactive mode
+[INFO] Archetype [org.codehaus.mojo.archetypes:ejb-javaee7:1.5] found in catalog remote
+Define value for property 'groupId': : com.shinysparkly
+Define value for property 'artifactId': : payment-arrangements
+Define value for property 'version':  1.0-SNAPSHOT: :
+Define value for property 'package':  com.shinysparkly: :
+Confirm properties configuration:
+groupId: com.company
+artifactId: payment-arrangements
+version: 1.0-SNAPSHOT
+package: com.company.collections
+Y: :
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 32.440s
+[INFO] Finished at: Mon Oct 31 10:11:12 EST 2011
+[INFO] Final Memory: 7M/81M
+[INFO] ------------------------------------------------------------------------
+[localhost]$
+----
+
+. *Add your enterprise beans:* Write your enterprise beans and add them to the project under the `src/main/java` directory in the appropriate sub-directory for the bean's package.
+
+. *Build the project:* To build the project, run the `mvn package` command in the same directory as the `pom.xml` file. This will compile the Java classes and package the JAR file. The built JAR file is named `-.jar` and is placed in the `target/` directory.
+
+You now have a Maven project that builds and packages a JAR
+file. This project can contain enterprise beans and the JAR file can be deployed to an application server.

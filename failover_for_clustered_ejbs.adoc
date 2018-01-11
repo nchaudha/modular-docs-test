@@ -1,0 +1,6 @@
+[[failover_for_clustered_ejbs]]
+= Failover for Clustered EJBs
+
+Clustered EJBs have failover capability. The state of the `@Stateful` EJBs is replicated across the cluster nodes so that if one of the nodes in the cluster goes down, some other node will be able to take over the invocations. 
+
+Under some circumstances in a clustered environment, such as when a server in the cluster crashes, the EJB client might receive an exception instead of a response. The EJB client library will automatically retry the invocation when it is safe to do so, depending on the type of the failure that occurs. However, if a request fails and it cannot be determined conclusively to be safe to retry, then you can handle the exception as appropriate for your environment. You can, however, use custom interceptors to add additional retry behavior.

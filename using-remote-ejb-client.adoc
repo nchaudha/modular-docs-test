@@ -1,0 +1,66 @@
+[[using_ejb_client]]
+= Using Remote EJB Clients
+
+[[initial_context_lookup]]
+== Initial Context Lookup
+
+You can pass the remote server's address using the `PROVIDER_URL` property when creating an initial context:
+
+[source,java,options="nowrap"]
+----
+public class Client {
+    public static void main(String[] args)
+            throws NamingException, PrivilegedActionException, InterruptedException {
+        InitialContext ctx = new InitialContext(getCtxProperties());
+        String lookupName = "ejb:/server/HelloBean!ejb.HelloBeanRemote";
+        HelloBeanRemote bean = (HelloBeanRemote)ctx.lookup(lookupName);
+        System.out.println(bean.hello());
+        ctx.close();
+    }
+    public static Properties getCtxProperties() {
+        Properties props = new Properties();
+        props.put(Context.INITIAL_CONTEXT_FACTORY, WildFlyInitialContextFactory.class.getName());
+        props.put(Context.PROVIDER_URL, "remote+http://127.0.0.1:8080");
+        props.put(Context.SECURITY_PRINCIPAL, "joe");
+        props.put(Context.SECURITY_CREDENTIALS, "joeIsAwesome2013!");
+        return props;
+    }
+}
+----
+
+NOTE: The Initial context factory to be used for the lookup is `org.wildfly.naming.client.WildFlyInitialContextFactory`.
+
+[[remote_ejb_configuration_file]]
+== Remote EJB Configuration File
+
+{ProductShortName} features the Elytron security framework. The `wildfly-config.xml` file, which is present in the `META-INF/` directory of the client application's class path, allows a wide range of authentication and authorization options for the Elytron security framework and EJB client configuration.
+
+[source,xml,subs="attributes+",options="nowrap"]
+----
+<configuration>
+   <authentication-client xmlns="{ElytronAuthClientNamespace}">
+      <authentication-rules>
+         <rule use-configuration="default" />
+      </authentication-rules>
+      <authentication-configurations>
+         <configuration name="default">
+            <sasl-mechanism-selector selector="DIGEST-MD5" />
+            <set-user-name name="admin" />
+            <credentials>
+               <clear-password password="password123!" />
+            </credentials>
+            <providers>
+              <use-service-loader />
+            </providers>
+         </configuration>
+      </authentication-configurations>
+   </authentication-client>
+   <jboss-ejb-client xmlns="urn:jboss:wildfly-client-ejb:3.0">
+      <connections>
+         <connection uri="remote+http://127.0.0.1:8080" />
+      </connections>
+   </jboss-ejb-client>
+</configuration>
+----
+
+As an alternative to embedding the `PROVIDER_URL`, `SECURITY_PRINCIPAL` and `SECURITY_CREDENTIALS` parameters in the initial context, you can use the `<connection-uri>` and `<authentication-client>` elements in the `wildfly-config.xml` file to configure the connection URI and the security settings, respectively.

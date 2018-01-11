@@ -1,0 +1,94 @@
+[[configure_delivery_active]]
+= Delivery Active
+
+The delivery active configuration of the message-driven beans (MDB) indicates whether the MDB is receiving messages or not. If an MDB is not receiving messages, then the messages will be saved in the queue or topic according to the topic or queue rules.
+
+You can configure the `active` attribute of the `delivery-group` using XML or annotations, and you can change its value after deployment using the management CLI. By default, the `active` attribute is activated and delivery of messages occurs as soon as the MDB is deployed.
+
+[discrete]
+== Configuring Delivery Active in the jboss-ejb3.xml File
+
+In the `jboss-ejb3.xml` file, set the value of `active` to `false` to indicate that the MDB will not be receiving messages as soon as it is deployed:
+[source,xml,options="nowrap"]
+----
+<?xml version="1.1" encoding="UTF-8"?>
+<jboss:ejb-jar xmlns:jboss="http://www.jboss.com/xml/ns/javaee"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:d="urn:delivery-active:1.1"
+    xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/ejb-jar_3_1.xsd"
+    version="3.1"
+    impl-version="2.0">
+    <assembly-descriptor>
+        <d:delivery>
+            <ejb-name>HelloWorldQueueMDB</ejb-name>
+            <d:active>false</d:active>
+        </d:delivery>
+    </assembly-descriptor>
+</jboss:ejb-jar>
+----
+
+If you want to apply the active value to all MDBs in your application, you can use a wildcard `*` in place of the `ejb-name`.
+
+[discrete]
+== Configuring Delivery Active Using Annotations
+You can also use the `org.jboss.ejb3.annotation.DeliveryActive` annotation. For example:
+[source,java,options="nowrap"]
+----
+@MessageDriven(name = "HelloWorldMDB", activationConfig = {
+ @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+ @ActivationConfigProperty(propertyName = "destination", propertyValue = "queue/HELLOWORLDMDBQueue"),
+ @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+@DeliveryActive(false)
+
+public class HelloWorldMDB implements MessageListener {
+    public void onMessage(Message rcvMessage) {
+      // ...
+    }
+}
+----
+If you use Maven to build your project, make sure you add the following dependency to the `pom.xml` file of your project:
+
+[source,xml,options="nowrap"]
+----
+<dependency>
+    <groupId>org.jboss.ejb3</groupId>
+    <artifactId>jboss-ejb3-ext-api</artifactId>
+    <version>2.2.0.Final</version>
+</dependency>
+----
+
+[discrete]
+== Configuring Delivery Active Using the Management CLI
+
+You can configure the `active` attribute of the `delivery-group` after deployment using the management CLI. These management operations dynamically change the value of the `active` attribute, enabling or disabling delivery for the MDB. This method of changing the delivery active value does not persist if you restart the server. At runtime, connect to the instance you want to manage, then enter the path of the MDB for which you want to manage the delivery. For example:
+
+* Navigate to the instance you want to manage:
++
+[options="nowrap"]
+----
+cd deployment=helloworld-mdb.war/subsystem=ejb3/message-driven-bean=HelloWorldQueueMDB
+----
+* To stop the delivery to the MDB:
++
+[options="nowrap"]
+----
+:stop-delivery
+----
+* To start the delivery to the MDB:
++
+[options="nowrap"]
+----
+:start-delivery
+----
+
+[discrete]
+== View the MDB Delivery Active Status
+You can view the current delivery active status of any MDB using the management console:
+
+. Choose *Deployments* and select the deployed MDB application. Click on *View*.
+. Expand the application and select the subsystem `message-driven-bean`.
+. Select the child resource, for example `HelloWorldQueueMDB`. Click on *View*.
+
+.Result
+You see the status as `Delivery active: true` or `Delivery active: false`.

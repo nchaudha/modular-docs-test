@@ -1,0 +1,12 @@
+[[about_ejb_method_permissions]]
+= About EJB Method Permissions
+
+EJBs can restrict access to their methods to specific security roles.
+
+The EJB `<method-permission>` element declaration specifies the roles that
+can invoke the interface methods of the EJB. You can specify permissions for
+the following combinations:
+
+* All home and component interface methods of the named EJB
+* A specified method of the home or component interface of the named EJB
+* A specified method within a set of methods with an overloaded name

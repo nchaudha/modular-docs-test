@@ -1,0 +1,6 @@
+[[about_ejb_security_identity]]
+= About EJB Security Identity
+
+An EJB can specify an identity to use when invoking methods on other components. This is the EJB security identity, also known as invocation identity.
+
+By default, the EJB uses its own caller identity. The identity can alternatively be set to a specific security role. Using specific security roles is useful when you want to construct a segmented security model, for example, restricting access to a set of components to internal EJBs only.

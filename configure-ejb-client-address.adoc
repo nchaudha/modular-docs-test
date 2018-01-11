@@ -1,0 +1,68 @@
+[[configure_ejb_client_address]]
+= Configure the EJB Client Address
+
+You can determine the EJB client address using the `SessionContext` interface, as shown in the example below.
+
+[source,java,options="nowrap"]
+----
+public class HelloBean implements HelloBeanRemote {
+    @Resource
+    SessionContext ctx;
+    private Long counter;
+    public HelloBean() {
+    }
+    @PostConstruct
+    public void init() {
+        counter = 0L;
+    }
+    @Override
+    @RolesAllowed("users")
+    public String hello() {
+        final String message = "method hello() invoked by user " + ctx.getCallerPrincipal().getName()
+                + ", source addr = " +  ctx.getContextData().get("jboss.source-address").toString();
+        System.out.println(message);
+        return message;
+    }
+}
+----
+
+
+[discrete]
+== Standalone Client Configuration
+
+You can configure the `outbound-bind-addresses` element within the `worker` element having namespace `urn:xnio:3.5` in the `wildfly-client.xml` file. The
+`bind-address` sub-element takes the attributes `match`, `bind-address`, `bind-port`, as defined below.
+
+The following is an example of the standalone client configuration using the `wildfly-client.xml` file.
+
+[source,xml,options="nowrap",subs="+quotes"]
+----
+<configuration>
+    <worker xmlns="urn:xnio:3.5">
+        <worker-name value="default"/>
+        <outbound-bind-addresses>
+            <bind-address bind-address=__IP_ADDRESS_TO_BIND_TO__ bind-port=__OPTIONAL_SOURCE_PORT_NUMBER__ match=__CIDR_BLOCK__ />
+        </outbound-bind-addresses>
+    </worker>
+</configuration>
+----
+
+The `outbound-bind-address` requires the following attributes:
+
+* `match` is a Classless Inter-Domain Routing (CIDR) block, such as `10.0.0.0/8`, `ff00::\8`, `0.0.0.0/0`, `::/0`.
+* `bind-address` specifies the IP address to bind to when the destination address matches the CIDR block specified in the `match` parameter. It should be the same address family as the CIDR block.
+* `bind-port` is an optional source port number that defaults to `0`.
++
+If no matching expression exists, then the outbound socket is not explicitly bound.
+
+[discrete]
+== Container-based Configuration
+
+Container-based configuration of the EJB client address is similar to the standalone client configuration defined in the `wildfly-client.xml` file.
+
+The example below configures the `outbound-bind-address` on the default `worker` element of the `io` subsystem, which the `ejb3` subsystem uses by default.
+
+[source,options="nowrap",subs="+quotes"]
+----
+/subsystem=io/worker=default/outbound-bind-address=__SPECIFY_OUTBOUND_BIND_ADDRESS__:add(bind-address=__IP_ADDRESS_TO_BIND_TO__, bind-port=__OPTIONAL_SOURCE_PORT_NUMBER__, match=__CIDR_BLOCK__)
+----

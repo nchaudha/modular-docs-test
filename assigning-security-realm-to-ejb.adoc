@@ -1,0 +1,17 @@
+[[assigning_security_realm_to_ejb]]
+= Relationship Between Security Domains and Security Realms  
+
+[IMPORTANT]
+====
+For EJBs to be secured by security realms, they have to use a security domain which is configured to retrieve user credentials from the security realm. This means that the domain needs to contain the Remoting and RealmDirect login modules. Assigning a security domain is done by the `@SecurityDomain` annotation, which can be applied on an EJB. 
+====
+
+The `other` security domain retrieves the user and password data from the underlying security realm. This security domain is the default one if there is no `@SecurityDomain` annotation on the EJB but the EJB contains any of the other security-related annotations to be considered secured.
+
+The underlying `http-remoting connector`, which is used by the client to establish a connection, decides which security realm is used. For more information on `http-remoting connector`, see link:{LinkConfigGuide}#about_the_remoting_subsystem[About the Remoting Subsystem] in the {ProductShortName} _Configuration Guide_.
+
+The security realm of the default connector can be changed this way:
+[options="nowrap"]
+----
+/subsystem=remoting/http-connector=http-remoting-connector:write-attribute(name=security-realm,value=MyDomainRealm)
+----

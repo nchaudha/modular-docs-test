@@ -1,0 +1,40 @@
+[[use_security_realms_with_remote_ejb_clients]]
+= Use Security Realms with Remote EJB Clients
+
+One way to add security to clients which invoke EJBs remotely is to use security realms. A security realm is a simple database of username/password pairs and username/role pairs. The terminology is also used in the context of web containers, with a slightly different meaning.
+
+To authenticate a specific username/password pair that exists in a security realm against an EJB, follow these steps:
+
+* Add a new security realm to the domain controller or standalone server.
+* Configure the `wildfly-config.xml` file, which is located in the class path of the application, as shown in the following example:
++
+[source,xml,subs="attributes+",options="nowrap"]
+----
+<configuration>
+   <authentication-client xmlns="{ElytronAuthClientNamespace}">
+      <authentication-rules>
+         <rule use-configuration="default" />
+      </authentication-rules>
+      <authentication-configurations>
+         <configuration name="default">
+            <sasl-mechanism-selector selector="DIGEST-MD5" />
+            <set-user-name name="admin" />
+            <credentials>
+               <clear-password password="password123!" />
+            </credentials>
+            <providers>
+              <use-service-loader />
+            </providers>
+         </configuration>
+      </authentication-configurations>
+   </authentication-client>
+   <jboss-ejb-client xmlns="urn:jboss:wildfly-client-ejb:3.0">
+      <connections>
+         <connection uri="remote+http://127.0.0.1:8080" />
+      </connections>
+   </jboss-ejb-client>
+</configuration>
+----
+
+* Create a custom remoting connector on the domain or standalone server that uses your new security realm.
+* Deploy your EJB to the server group which is configured to use the profile with the custom Remoting connector, or to your standalone server if you are not using a managed domain.

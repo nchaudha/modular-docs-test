@@ -1,0 +1,17 @@
+[[remote_standalone_clients]]
+= Remote Standalone Clients
+
+NOTE: The use of the `jboss-ejb-client.properties` file is deprecated in favor of the `wildfly-config.xml` file.
+
+A standalone remote client can use either the JNDI approach or native JBoss EJB client APIs to communicate with the servers. The important thing to note is that when you are invoking clustered EJB deployments, you do not have to list all the servers within the cluster. This would not have been feasible due the dynamic nature of cluster node additions within a cluster.
+
+The remote client has to list only one of the servers with the clustering capability. This server will act as the starting point for cluster topology communication between the client and the clustered nodes.
+
+Note that you have to configure the `ejb` cluster in the `jboss-ejb-client.properties` configuration file:
+
+[options="nowrap"]
+----
+remote.clusters=ejb
+remote.cluster.ejb.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+remote.cluster.ejb.connect.options.org.xnio.Options.SSL_ENABLED=false
+----
