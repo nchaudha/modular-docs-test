@@ -1,0 +1,79 @@
+[[remote_ejb_data_compression]]
+= Remote EJB Data Compression
+
+Previous versions of {ProductShortName} included a feature where the message stream that contained the EJB protocol message could be compressed. This feature has been included in {ProductShortName} 6.3 and later.
+
+[NOTE]
+====
+Compression currently can only be specified by annotations on the EJB
+interface which should be on the client and server side. There is not
+currently an XML equivalent to specify compression hints.
+====
+
+Data compression hints can be specified via the JBoss annotation
+`org.jboss.ejb.client.annotation.CompressionHint`. The hint values specify whether to compress the request, response or request and response. Adding `@CompressionHint` defaults to `compressResponse=true` and `compressRequest=true`.
+
+The annotation can be specified at the interface level to apply to all methods in the EJB's interface such as:
+
+[source,java,options="nowrap"]
+----
+import org.jboss.ejb.client.annotation.CompressionHint;
+
+@CompressionHint(compressResponse = false)
+public interface ClassLevelRequestCompressionRemoteView {
+    String echo(String msg);
+}
+----
+
+Or the annotation can be applied to specific methods in the EJB's
+interface such as:
+
+[source,java,options="nowrap"]
+----
+import org.jboss.ejb.client.annotation.CompressionHint;
+
+public interface CompressableDataRemoteView {
+
+    @CompressionHint(compressResponse = false, compressionLevel = Deflater.BEST_COMPRESSION)
+    String echoWithRequestCompress(String msg);
+
+    @CompressionHint(compressRequest = false)
+    String echoWithResponseCompress(String msg);
+
+    @CompressionHint
+    String echoWithRequestAndResponseCompress(String msg);
+
+    String echoWithNoCompress(String msg);
+}
+----
+
+The `compressionLevel` setting shown above can have the following
+values:
+
+* BEST_COMPRESSION
+* BEST_SPEED
+* DEFAULT_COMPRESSION
+* NO_COMPRESSION
+
+The `compressionLevel` setting defaults to
+`Deflater.DEFAULT_COMPRESSION`.
+
+Class level annotation with method level overrides:
+
+[source,java,options="nowrap"]
+----
+@CompressionHint
+public interface MethodOverrideDataCompressionRemoteView {
+
+    @CompressionHint(compressRequest = false)
+    String echoWithResponseCompress(final String msg);
+
+    @CompressionHint(compressResponse = false)
+    String echoWithRequestCompress(final String msg);
+
+    String echoWithNoExplicitDataCompressionHintOnMethod(String msg);
+}
+----
+
+On the client side ensure the
+`org.jboss.ejb.client.view.annotation.scan.enabled` system property is set to `true`. This property tells JBoss EJB Client to scan for annotations.

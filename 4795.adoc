@@ -1,0 +1,61 @@
+[[use_ejb_security_annotations]]
+= Use EJB Security Annotations
+
+You can use either XML descriptors or annotations to control which
+security roles are able to call methods in your Enterprise JavaBeans
+(EJBs). For information on using XML descriptors, see xref:use_ejb_method_permissions[Use EJB Method Permissions].
+
+Any method values explicitly specified in the deployment descriptor
+override annotation values. If a method value is not specified in the
+deployment descriptor, those values set using annotations are used. The
+overriding granularity is on a per-method basis.
+
+.Annotations for Controlling Security Permissions of EJBs
+
+@DeclareRoles::
+  Use `@DeclareRoles` to define which security roles to check permissions
+  against. If no `@DeclareRoles` is present, the list is built
+  automatically from the `@RolesAllowed` annotation. For information about
+  configuring roles, see the Java EE 7 tutorial
+  https://docs.oracle.com/javaee/7/tutorial/security-javaee002.htm#GJGCQ[Specifying
+  Authorized Users by Declaring Security Roles].
+@RolesAllowed, @PermitAll, @DenyAll::
+  Use `@RolesAllowed` to list which roles are allowed to access a method
+  or methods. Use `@PermitAll` or `@DenyAll` to either permit or deny
+  all roles from using a method or methods. For information about
+  configuring annotation method permissions, see the Java EE 7 tutorial
+  https://docs.oracle.com/javaee/7/tutorial/security-javaee002.htm#GJGCQ[Specifying
+  Authorized Users by Declaring Security Roles].
+@RunAs::
+  Use `@RunAs` to specify a role a method uses when making calls from
+  the annotated method. For information about configuring propagated
+  security identities using annotations, see the Java EE 7 tutorial
+  https://docs.oracle.com/javaee/7/tutorial/security-javaee002.htm[Propagating
+  a Security Identity (Run-As)].
+
+.Example: Security Annotations Example
+[source,java,options="nowrap"]
+----
+@Stateless
+@RolesAllowed({"admin"})
+@SecurityDomain("other")
+public class WelcomeEJB implements Welcome {
+    @PermitAll
+    public String WelcomeEveryone(String msg) {
+        return "Welcome to " + msg;
+    }
+    @RunAs("tempemployee")
+    public String GoodBye(String msg) {
+        return "Goodbye, " + msg;
+    }
+    public String GoodbyeAdmin(String msg) {
+        return "See you later, " + msg;
+    }
+}
+
+----
+
+In this code, all roles can access method `WelcomeEveryone`. The
+`GoodBye` method uses the `tempemployee` role when making calls. Only
+the `admin` role can access method `GoodbyeAdmin`, and any other methods
+with no security annotation.

@@ -1,0 +1,58 @@
+[[create_a_jms_based_message_driven_bean_in_red_hat_jboss_developer_studio]]
+= Create a JMS-based Message-Driven Bean in Red Hat JBoss Developer Studio
+
+This procedure shows how to add a JMS-based message-driven bean to a project in Red Hat JBoss Developer Studio. This procedure creates an EJB 3.x message-driven bean that uses annotations.
+
+[discrete]
+== Prerequisites
+
+* You must have an existing project open in Red Hat JBoss Developer Studio.
+* You must know the name and type of the JMS destination that the bean will be listening to.
+* Support for Java Messaging Service (JMS) must be enabled in the
+{ProductShortName} configuration to which this bean will be deployed.
+
+[discrete]
+== Add a JMS-based Message-driven Bean in Red Hat JBoss Developer Studio
+
+. Open the *Create EJB 3.x Message-Driven Bean* wizard.
++
+Go to *File -> New -> Other*. Select *EJB/Message-Driven Bean (EJB 3.x)* and click the *Next* button.
++
+.Create EJB 3.x Message-Driven Bean Wizard
+image::111.png[Create EJB 3.x Message-Driven Bean Wizard]
+
+. Specify class file destination details.
++
+There are three sets of details to specify for the bean class here: project, Java class, and message destination.
++
+** *Project:*
+*** If multiple projects exist in the workspace, ensure that the correct one is selected in the *Project* menu.
+*** The folder where the source file for the new bean will be created is `ejbModule` under the selected project's directory. Only change this if you have a specific requirement.
+** *Java Class:*
+*** The required fields are: *Java package* and *Class name*.
+*** It is not necessary to supply a superclass unless the business logic of your application requires it.
+** *Message Destination:*
+*** These are the details you must supply for a JMS-based message-driven bean:
+**** *Destination name*, which is the queue or topic name that contains the messages that the bean will respond to.
+**** By default the *JMS* checkbox is selected. Do not change this.
+**** Set *Destination type* to *Queue* or *Topic* as required.
++
+Click the *Next* button.
+
+. Enter message-driven bean specific information.
++
+The default values here are suitable for a JMS-based message-driven bean
+using container-managed transactions.
++
+** Change the *Transaction type* to Bean if the Bean will use Bean-managed transactions.
+** Change the *Bean name* if a different bean name than the class name is required.
+** The *JMS Message Listener* interface will already be listed. You do not need to add or remove any interfaces unless they are specific to your
+application's business logic.
+** Leave the checkboxes for creating method stubs selected.
++
+Click the *Finish* button.
+
+.Result
+The message-driven bean is created with stub methods for the
+default constructor and the `onMessage()` method. A Red Hat JBoss
+Developer Studio editor window opens with the corresponding file.

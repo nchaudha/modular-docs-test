@@ -1,0 +1,239 @@
+[[implementing_a_custom_load_balancing_policy_for_ejb_calls]]
+= Implementing a Custom Load Balancing Policy for EJB Calls
+
+NOTE: The use of the `jboss-ejb-client.properties` file is deprecated in favor of the `wildfly-config.xml` file.
+
+It is possible to implement an alternate or customized load balancing policy in order to balance an application's EJB calls across servers.
+
+You can implement `AllClusterNodeSelector` for EJB calls. The node
+selection behavior of `AllClusterNodeSelector` is similar to default selector except that `AllClusterNodeSelector` uses all available cluster nodes even in case of a large cluster (number of nodes > 20). If an unconnected cluster node is returned, it is opened automatically. The following example shows `AllClusterNodeSelector` implementation:
+
+[source,java,options="nowrap"]
+----
+package org.jboss.as.quickstarts.ejb.clients.selector;
+
+import java.util.Arrays;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jboss.ejb.client.ClusterNodeSelector;
+public class AllClusterNodeSelector implements ClusterNodeSelector {
+  private static final Logger LOGGER = Logger.getLogger(AllClusterNodeSelector.class.getName());
+
+  @Override
+  public String selectNode(final String clusterName, final String[] connectedNodes, final String[] availableNodes) {
+    if(LOGGER.isLoggable(Level.FINER)) {
+      LOGGER.finer("INSTANCE "+this+ " : cluster:"+clusterName+" connected:"+Arrays.deepToString(connectedNodes)+" available:"+Arrays.deepToString(availableNodes));
+    }
+
+    if (availableNodes.length == 1) {
+        return availableNodes[0];
+    }
+    final Random random = new Random();
+    final int randomSelection = random.nextInt(availableNodes.length);
+    return availableNodes[randomSelection];
+  }
+
+}
+----
+
+You can also implement the `SimpleLoadFactorNodeSelector` for EJB calls. Load balancing in `SimpleLoadFactorNodeSelector` happens based on a load factor. The load factor (2/3/4) is calculated based on the names of nodes (A/B/C) irrespective of the load on each node. The following example shows `SimpleLoadFactorNodeSelector` implementation:
+
+[source,java,options="nowrap"]
+----
+package org.jboss.as.quickstarts.ejb.clients.selector;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.jboss.ejb.client.DeploymentNodeSelector;
+public class SimpleLoadFactorNodeSelector implements DeploymentNodeSelector {
+  private static final Logger LOGGER = Logger.getLogger(SimpleLoadFactorNodeSelector.class.getName());
+  private final Map<String, List<String>[]> nodes = new HashMap<String, List<String>[]>();
+  private final Map<String, Integer> cursor = new HashMap<String, Integer>();
+
+  private ArrayList<String> calculateNodes(Collection<String> eligibleNodes) {
+    ArrayList<String> nodeList = new ArrayList<String>();
+
+    for (String string : eligibleNodes) {
+      if(string.contains("A") || string.contains("2")) {
+        nodeList.add(string);
+        nodeList.add(string);
+      } else if(string.contains("B") || string.contains("3")) {
+        nodeList.add(string);
+        nodeList.add(string);
+        nodeList.add(string);
+      } else if(string.contains("C") || string.contains("4")) {
+        nodeList.add(string);
+        nodeList.add(string);
+        nodeList.add(string);
+        nodeList.add(string);
+      }
+    }
+    return nodeList;
+  }
+
+  @SuppressWarnings("unchecked")
+  private void checkNodeNames(String[] eligibleNodes, String key) {
+    if(!nodes.containsKey(key) || nodes.get(key)[0].size() != eligibleNodes.length || !nodes.get(key)[0].containsAll(Arrays.asList(eligibleNodes))) {
+      // must be synchronized as the client might call it concurrent
+      synchronized (nodes) {
+        if(!nodes.containsKey(key) || nodes.get(key)[0].size() != eligibleNodes.length || !nodes.get(key)[0].containsAll(Arrays.asList(eligibleNodes))) {
+          ArrayList<String> nodeList = new ArrayList<String>();
+          nodeList.addAll(Arrays.asList(eligibleNodes));
+
+          nodes.put(key, new List[] { nodeList, calculateNodes(nodeList) });
+        }
+      }
+    }
+  }
+   private synchronized String nextNode(String key) {
+    Integer c = cursor.get(key);
+    List<String> nodeList = nodes.get(key)[1];
+
+    if(c == null || c >= nodeList.size()) {
+      c = Integer.valueOf(0);
+    }
+
+    String node = nodeList.get(c);
+    cursor.put(key, Integer.valueOf(c + 1));
+
+    return node;
+  }
+
+  @Override
+  public String selectNode(String[] eligibleNodes, String appName, String moduleName, String distinctName) {
+    if (LOGGER.isLoggable(Level.FINER)) {
+      LOGGER.finer("INSTANCE " + this + " : nodes:" + Arrays.deepToString(eligibleNodes) + " appName:" + appName + " moduleName:" + moduleName
+          + " distinctName:" + distinctName);
+    }
+
+    // if there is only one there is no sense to choice
+    if (eligibleNodes.length == 1) {
+      return eligibleNodes[0];
+    }
+    final String key = appName + "|" + moduleName + "|" + distinctName;
+
+    checkNodeNames(eligibleNodes, key);
+    return nextNode(key);
+  }
+}
+----
+
+[discrete]
+== Configuring the jboss-ejb-client.properties File
+You need to add the property `remote.cluster.ejb.clusternode.selector` with the name of your implementation class (`AllClusterNodeSelector` or `SimpleLoadFactorNodeSelector`). The selector will see all configured servers that are available at the invocation time. The following example uses `AllClusterNodeSelector` as the cluster node selector:
+
+[source,options="nowrap"]
+----
+remote.clusters=ejb
+remote.cluster.ejb.clusternode.selector=org.jboss.as.quickstarts.ejb.clients.selector.AllClusterNodeSelector
+remote.cluster.ejb.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+remote.cluster.ejb.connect.options.org.xnio.Options.SSL_ENABLED=false
+remote.cluster.ejb.username=test
+remote.cluster.ejb.password=password
+
+remote.connectionprovider.create.options.org.xnio.Options.SSL_ENABLED=false
+remote.connections=one,two
+remote.connection.one.host=localhost
+remote.connection.one.port = 8080
+remote.connection.one.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+remote.connection.one.username=user
+remote.connection.one.password=user123
+remote.connection.two.host=localhost
+remote.connection.two.port = 8180
+remote.connection.two.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+----
+
+[discrete]
+== Using EJB Client API
+You need to add the property `remote.cluster.ejb.clusternode.selector`
+to the list for the `PropertiesBasedEJBClientConfiguration` constructor. The following example uses `AllClusterNodeSelector` as the cluster node selector:
+
+[source,options="nowrap"]
+----
+Properties p = new Properties();
+p.put("remote.clusters", "ejb");
+p.put("remote.cluster.ejb.clusternode.selector", "org.jboss.as.quickstarts.ejb.clients.selector.AllClusterNodeSelector");
+p.put("remote.cluster.ejb.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS", "false");
+p.put("remote.cluster.ejb.connect.options.org.xnio.Options.SSL_ENABLED", "false");
+p.put("remote.cluster.ejb.username", "test");
+p.put("remote.cluster.ejb.password", "password");
+
+p.put("remote.connectionprovider.create.options.org.xnio.Options.SSL_ENABLED", "false");
+p.put("remote.connections", "one,two");
+p.put("remote.connection.one.port", "8080");
+p.put("remote.connection.one.host", "localhost");
+p.put("remote.connection.two.port", "8180");
+p.put("remote.connection.two.host", "localhost");
+
+EJBClientConfiguration cc = new PropertiesBasedEJBClientConfiguration(p);
+ContextSelector<EJBClientContext> selector = new ConfigBasedEJBClientContextSelector(cc);
+EJBClientContext.setSelector(selector);
+
+p = new Properties();
+p.put(Context.URL_PKG_PREFIXES, "org.jboss.ejb.client.naming");
+InitialContext context = new InitialContext(p);
+----
+[discrete]
+== Configuring the jboss-ejb-client.xml File
+To use the load balancing policy for server to server communication, package the class together with the application and configure it within the `jboss-ejb-client.xml` settings located in `META-INF` folder. The following example uses `AllClusterNodeSelector` as the cluster node selector:
+
+[source,xml,options="nowrap"]
+----
+<jboss-ejb-client xmlns:xsi="urn:jboss:ejb-client:1.2" xsi:noNamespaceSchemaLocation="jboss-ejb-client_1_2.xsd">
+  <client-context deployment-node-selector="org.jboss.ejb.client.DeploymentNodeSelector">
+    <ejb-receivers>
+      <!-- This is the connection to access the application. -->
+      <remoting-ejb-receiver outbound-connection-ref="remote-ejb-connection-1" />
+    </ejb-receivers>
+    <!-- Specify the cluster configurations applicable for this client context -->
+    <clusters>
+      <!-- Configure the cluster of remote-ejb-connection-1. -->
+      <cluster name="ejb" security-realm="ejb-security-realm-1" username="test" cluster-node-selector="org.jboss.as.quickstarts.ejb.clients.selector.AllClusterNodeSelector">
+        <connection-creation-options>
+          <property name="org.xnio.Options.SSL_ENABLED" value="false" />
+          <property name="org.xnio.Options.SASL_POLICY_NOANONYMOUS" value="false" />
+        </connection-creation-options>
+      </cluster>
+    </clusters>
+  </client-context>
+</jboss-ejb-client>
+----
+
+To use the above configuration with security, you will need to add
+`ejb-security-realm-1` to client-server configuration. The following example shows the CLI commands for adding security realm
+(`ejb-security-realm-1`) the value is the base64 encoded password for the user "test":
+
+[source,options="nowrap"]
+----
+/core-service=management/security-realm=ejb-security-realm-1:add()
+/core-service=management/security-realm=ejb-security-realm-1/server-identity=secret:add(value=cXVpY2sxMjMr)
+----
+
+If the load balancing policy should be used for server to server communication, the class can be packaged together with the application or as a module. This class is configured in the `jboss-ejb-client` settings file located in the `META-INF` directory of the top-level EAR archive. The following example uses `RoundRobinNodeSelector` as the deployment node selector.
+
+[source,xml,options="nowrap"]
+----
+<jboss-ejb-client xmlns="urn:jboss:ejb-client:1.2">
+    <client-context deployment-node-selector="org.jboss.example.RoundRobinNodeSelector">
+        <ejb-receivers>
+            <remoting-ejb-receiver outbound-connection-ref="..."/>
+        </ejb-receivers>
+        ...
+    </client-context>
+</jboss-ejb-client>
+----
+
+[NOTE]
+====
+If you are running a standalone server, use the start option
+`-Djboss.node.name=` or the server configuration file `standalone.xml` to configure the server name. Ensure that the server name is unique. If you are running a managed domain, the host controller automatically validates that the names are unique.
+====

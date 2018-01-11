@@ -1,0 +1,4 @@
+[[session_beans]]
+= Session Beans
+
+Session beans are enterprise beans that encapsulate a set of related business processes or tasks and are injected into the classes that request them. There are three types of session bean: stateless, stateful, and singleton.

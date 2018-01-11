@@ -1,0 +1,29 @@
+[[enterprise_bean_business_interfaces]]
+= Enterprise Bean Business Interfaces
+
+An EJB business interface is a Java interface written by the bean developer which provides declarations of the public methods of a session bean that are available for clients. Session beans can implement any number of interfaces, including none (a _no-interface_ bean).
+
+Business interfaces can be declared as local or remote interfaces, but not both.
+
+[discrete]
+== EJB Local Business Interfaces
+
+An EJB local business interface declares the methods which are available when the bean and the client are in the same JVM. When a session bean implements a local business interface only the methods declared in that interface will be available to clients.
+
+[discrete]
+== EJB Remote Business Interfaces
+
+An EJB remote business interface declares the methods which are available to remote clients. Remote access to a session bean that implements a remote interface is automatically provided by the EJB
+container.
+
+A remote client is any client running in a different JVM and can include desktop applications as well as web applications, services, and enterprise beans deployed to a different application server.
+
+Local clients can access the methods exposed by a remote business
+interface.
+
+[discrete]
+== EJB No-interface Beans
+
+A session bean that does not implement any business interfaces is called a no-interface bean. All of the public methods of no-interface beans are accessible to local clients.
+
+A session bean that implements a business interface can also be written to expose a _no-interface_ view.

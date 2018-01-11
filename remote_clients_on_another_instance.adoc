@@ -1,0 +1,13 @@
+[[remote_clients_on_another_instance]]
+= Remote Clients on Another Instance
+
+
+This section explains how a client application deployed on a {ProductShortName} instance invokes a clustered stateful bean that is deployed on another {ProductShortName} instance. 
+
+In the following example, there are three servers involved. Servers X and Y both belong to a cluster and have clustered EJBs deployed on them. There is another server instance server C, which may or may not have clustering capability. Server C acts as a client on which there is a deployment that wants to invoke the clustered beans deployed on servers X and Y and achieve failover.
+
+The configurations are done in the `jboss-ejb-client.xml` file, which points to a remote outbound connection to the other server. The configuration in the `jboss-ejb-client.xml` file is in the deployment of server C because server C is the client. The client configuration need not point to all the clustered nodes, but just to one of them. This will act as a starting point for the communication.
+
+In this case, a remote outbound connection is created from server C to server X and then server X is used as the starting point for the communication. Similar to the case of remote standalone clients, when the application on server C looks up a stateful bean, a session creation request is sent to server X that returns a session id and the cluster affinity for it. Server X also sends back an asynchronous message to server C containing the cluster topology. This topology information includes the node information of server Y, because server Y belongs to the cluster along with server X. Subsequent invocations on the proxy will be routed appropriately to the nodes in the cluster. If server X goes down, as explained earlier, a different node from the cluster will be selected and the invocation will be forwarded to that node.
+
+Both remote standalone clients as well as remote clients on another {ProductShortName} instance act similarly in terms of failover.

@@ -1,0 +1,19 @@
+[[create_a_container_interceptor_class]]
+= Create a Container Interceptor Class
+
+
+Container interceptor classes are simple Plain Old Java Objects (POJOs). They use the `@javax.annotation.AroundInvoke` to mark the method that is invoked during the invocation on the bean.
+
+The following is an example of a container interceptor class that marks the `iAmAround` method for invocation:
+
+.Container Interceptor Code Example
+[source,java,options="nowrap"]
+public class ClassLevelContainerInterceptor {
+    @AroundInvoke
+    private Object iAmAround(final InvocationContext invocationContext) throws Exception {
+        return this.getClass().getName() + " " + invocationContext.proceed();
+    }
+}
+----
+
+For an example of how to configure a `jboss-ejb3.xml` descriptor file to use a container interceptor class, see xref:configure_a_container_interceptor[Configure a Container Interceptor].

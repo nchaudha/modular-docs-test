@@ -1,0 +1,66 @@
+[[ejb_transactions_in_a_clustered_environment]]
+= EJB Transactions in a Clustered Environment
+
+If the client code invokes a clustered EJB, then the cluster affinity is set automatically. If you manage transactions on the client side, you can choose to xref:ejb_transactions_target_a_specific_node[target a specific node in the cluster] or you can xref:ejb_transactions_lazily_select_a_node[allow the client to lazily select the cluster node] to handle transactions. This section describes both options.
+
+[discrete]
+[[ejb_transactions_target_a_specific_node]]
+== EJB Transactions Target a Specific Node
+
+You can target a specific node in the cluster to handle a transaction using the following procedure.
+
+. Specify the target cluster node address using the `PROVIDER_URL` property when creating the `InitialContext`.
++
+[source,java,options="nowrap"]
+----
+props.put(Context.PROVIDER_URL, "remote+http://127.0.0.1:8080");
+...
+InitialContext ctx = new InitialContext(props);
+----
+. In the client, look up the `txn:RemoteUserTransaction` from the `InitialContext`.
++
+[source,java,options="nowrap"]
+----
+UserTransaction ut = (UserTransaction)ctx.lookup("txn:RemoteUserTransaction");
+----
++
+You can do a JNDI lookup for a `UserTransaction` by setting the `PROVIDER_URL` property to the URL of the server and then look up `txn:UserTransaction`, as shown in the code example below:
++
+[source,java,options="nowrap"]
+----
+final Hashtable<String, String> jndiProperties = new Hashtable<>();
+jndiProperties.put(Context.INITIAL_CONTEXT_FACTORY, "org.wildfly.naming.client.WildFlyInitialContextFactory");
+jndiProperties.put(Context.PROVIDER_URL, "remote+http://localhost:8080");
+final Context context = new InitialContext(jndiProperties);
+ 
+SecuredEJBRemote reference = (SecuredEJBRemote) context.lookup("txn:UserTransaction");
+----
++
+`UserTransaction` is not bound to any particular destination until an actual invocation takes place. Upon invocation, this `UserTransaction` is bound to the respective destination for the entire lifetime of the transaction.
++
+You do not need to know the node name or the destination before beginning a `UserTransaction`. The `org.jboss.ejb.client.EJBClient.getUserTransaction()` method gives you a remote `UserTransaction` that automatically selects its destination based on the first invocation. Looking up a remote `UserTransaction` from JNDI also works the same way.
++
+NOTE: The `org.jboss.ejb.client.EJBClient.getUserTransaction()` method is deprecated.
+
+. When the transaction begins, all EJB invocations are then bound to that specific node for duration of the transaction, establishing server affinity.
+
+. When the transaction ends, the server affinity is released, and the EJB proxies return to a general cluster affinity.
+
+
+[discrete]
+[[ejb_transactions_lazily_select_a_node]]
+== EJB Transactions Lazily Select a Node
+
+You can allow the client to lazily select the cluster node to handle transactions during the first invocation  pertaining to a transaction. This allows for load balancing of transactions across the cluster. To use this option, follow the procedure below.
+
+. Do not specify the `PROVIDER_URL` property in the `InitialContext` used to invoke the EJBs.
+. In the client, look up the `txn:RemoteUserTransaction` from the `InitialContext`.
++
+[source,java,options="nowrap"]
+----
+UserTransaction ut = (UserTransaction)ctx.lookup("txn:RemoteUserTransaction");
+----
+
+. When the transaction begins, one cluster node is selected automatically, establishing server affinity, and all EJB invocations are then bound to that specific node for duration of the transaction.
+
+. When the transaction ends, the server affinity is released, and the EJB proxies return to a general cluster affinity.

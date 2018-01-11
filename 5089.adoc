@@ -1,0 +1,14 @@
+[[enterprise_beans]]
+= Enterprise Beans
+
+Enterprise beans are written as Java classes and annotated with the appropriate EJB annotations. They can be deployed to the application server in their own archive (a JAR file) or be deployed as part of a Java EE application. The application server manages the lifecycle of each enterprise bean and provides services to them such as security, transactions and concurrency management.
+
+An enterprise bean can also define any number of business interfaces. Business interfaces provide greater control over which of the bean's methods are available to clients and can also allow access to clients running in remote JVMs.
+
+There are three types of enterprise beans: xref:session_beans[session beans], xref:message_driven_beans[message-driven beans] and entity beans.
+
+NOTE: {ProductShortName} does not support entity beans.
+
+== Writing Enterprise Beans
+
+Enterprise beans are packaged and deployed in Java archive (JAR) files. You can deploy an enterprise bean JAR file to your application server, or include it in an enterprise archive (EAR) file and deploy it with that application. You can also deploy enterprise beans in a web archive (WAR) file alongside a web application.

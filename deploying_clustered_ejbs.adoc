@@ -1,0 +1,35 @@
+[[deploying_clustered_ejbs]]
+= Deploying Clustered EJBs
+
+Clustering support is available in the HA profiles of {ProductShortName} {ProductVersion}. Starting the standalone server with HA capabilities enabled involves starting it with the `standalone-ha.xml` or `standalone-full-ha.xml` file:
+
+[options="nowrap",subs="+quotes"]
+----
+$ __EAP_HOME__/bin/standalone.sh --server-config=standalone-ha.xml
+----
+This will start a single instance of the server with HA capabilities.
+
+To be able to see the benefits of clustering, you will need more than one instance of the server. So let us start another server with HA capabilities. That another instance of the server can either be on the same machine or on some other machine. If it is on the same machine, you will need to take care of two things:
+
+* Pass the port offset for the second instance
+* Make sure that each of the server instances have a unique `jboss.node.name` system property.
+
+You can do that by passing the following two system properties to the startup command:
+
+[options="nowrap",subs="+quotes"]
+----
+$ __EAP_HOME__/bin/standalone.sh --server-config=standalone-ha.xml -Djboss.socket.binding.port-offset=__PORT_OFFSET__ -Djboss.node.name=__UNIQUE_NODE_NAME__
+----
+
+Follow whichever approach you feel comfortable with for deploying the EJB deployment to this instance too.
+
+WARNING: Deploying the application on just one node of a standalone instance of a clustered server does not mean that it will be automatically deployed to the other clustered instance. You will have to do deploy it explicitly on the other standalone clustered instance too. Or you can start the servers in domain mode so that the deployment can be deployed to all the servers within a server group.
+
+Now that you have deployed an application with clustered EJBs on both the instances, the EJBs are now capable of making use of the clustering features.
+
+[NOTE]
+====
+Starting {ProductShortName} {ProductRelease}, if {ProductShortName} is started using an HA profile, the state of your SFSBs will be replicated. You no longer need to use the `@Clustered` annotation to enable clustering behavior.
+
+Disabling this behavior is achievable on a per-EJB basis by annotating your bean using `@Stateful(passivationCapable=false)`, which is new to the EJB 3.2 specification; or globally, via the `ejb3` subsystem.
+====

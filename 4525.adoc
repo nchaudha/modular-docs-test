@@ -1,0 +1,6 @@
+[[overview_of_enterprise_javabeans]]
+= Overview of Enterprise JavaBeans
+
+Enterprise JavaBeans (EJB) 3.2 is an API for developing distributed, transactional, secure and portable Java EE applications through the use of server-side components called Enterprise Beans. Enterprise Beans implement the business logic of an application in a decoupled manner that encourages reuse. Enterprise JavaBeans 3.2 is documented as the Java EE specification https://jcp.org/en/jsr/detail?id=345[JSR-345].
+
+EJB 3.2 provides two profiles: full and lite. {ProductShortName} {ProductRelease} implements the full profile for applications built using the EJB 3.2 specifications.

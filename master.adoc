@@ -1,0 +1,248 @@
+include::topics/templates/document-attributes.adoc[]
+
+:imagesdir: topics/images
+:dev-guide-ejbs:
+
+= {DevEjbBookName}
+
+== Introduction
+// Overview of Enterprise JavaBeans
+include::topics/4525.adoc[leveloffset=+2]
+
+// EJB 3.2 Feature Set
+include::topics/4533.adoc[leveloffset=+2]
+
+// Enterprise Beans
+include::topics/5089.adoc[leveloffset=+2]
+
+// Writing Enterprise Beans
+// include::topics/5090-OBSOLETE.adoc[leveloffset=+2]
+
+// Enterprise Bean Business Interfaces
+include::topics/5096.adoc[leveloffset=+2]
+
+// Legacy EJB Client Compatibility
+include::topics/legacy-ejb-client-compatibility.adoc[leveloffset=+2]
+
+== Creating Enterprise Bean Projects
+// Create an EJB Archive Project Using Red Hat JBoss Developer Studio
+include::topics/5385.adoc[leveloffset=+2]
+
+// Create an EJB Archive Project in Maven
+include::topics/5099.adoc[leveloffset=+2]
+
+// Create an EAR Project containing an EJB Project
+include::topics/5098.adoc[leveloffset=+2]
+
+// Add a Deployment Descriptor to an EJB Project
+include::topics/5386.adoc[leveloffset=+2]
+
+== Session Beans
+// Session Beans
+include::topics/4527.adoc[leveloffset=+2]
+
+// Stateless Session Beans
+include::topics/5236.adoc[leveloffset=+2]
+
+// Stateful Session Beans
+include::topics/5237.adoc[leveloffset=+2]
+
+// Singleton Session Beans
+include::topics/5238.adoc[leveloffset=+2]
+
+// Add Session Beans to a Project in Red Hat JBoss Developer Studio
+include::topics/5440.adoc[leveloffset=+2]
+
+== Message-Driven Beans
+// Message-Driven Beans
+include::topics/4528.adoc[leveloffset=+2]
+
+// Resource Adapters
+// include::topics/4516.adoc[leveloffset=+2]
+
+// Message-Driven Beans Controlled Delivery
+include::topics/mdbs_controlled_delivery.adoc[leveloffset=+2]
+
+// Delivery Active
+include::topics/configure-delivery-active.adoc[leveloffset=+3]
+
+// Delivery Groups
+include::topics/delivery_groups.adoc[leveloffset=+3]
+
+// Clustered Singleton MDBs
+include::topics/clustered_singleton_mdbs.adoc[leveloffset=+3]
+
+// Create a JMS-based Message-Driven Bean in Red Hat JBoss Developer Studio
+include::topics/5094.adoc[leveloffset=+2]
+
+// Specifying a Resource Adapter in <filename>jboss-ejb3.xml</filename> for an MDB
+include::topics/42008.adoc[leveloffset=+2]
+
+// Enable EJB and MDB Property Substitution in an Application
+include::topics/30840.adoc[leveloffset=+2]
+
+// Activation Configuration Properties
+include::topics/activation-configuration-properties.adoc[leveloffset=+2]
+
+== Invoking Session Beans
+// About EJB Client Contexts
+include::topics/14184.adoc[leveloffset=+2]
+
+// Using Remote EJB Clients
+include::topics/using-remote-ejb-client.adoc[leveloffset=+2]
+
+// The ClientTransaction Annotation
+include::topics/client-transaction-annotation.adoc[leveloffset=+2]
+
+// Remote EJB Data Compression
+include::topics/44808.adoc[leveloffset=+2]
+
+// EJB Client Remoting Interoperability
+include::topics/ejb-client-remoting.adoc[leveloffset=+2]
+
+// Configure IIOP for Remote EJB Calls
+include::topics/iiop_ejb_invocation.adoc[leveloffset=+2]
+
+// Configure EJB Client Address in {ProductShortName}
+include::topics/configure-ejb-client-address.adoc[leveloffset=+2]
+
+// EJB Invocation Over HTTP
+include::topics/ejb-invocation-over-http.adoc[leveloffset=+2]
+
+== EJB Application Security
+
+=== Security Identity
+// About EJB Security Identity
+include::topics/4713.adoc[leveloffset=+3]
+
+// Set the Security Identity of an EJB
+include::topics/5052.adoc[leveloffset=+3]
+
+=== EJB Method Permissions
+// About EJB Method Permissions
+include::topics/4767.adoc[leveloffset=+3]
+
+// Use EJB Method Permissions
+include::topics/4794.adoc[leveloffset=+3]
+
+=== EJB Security Annotations
+// About EJB Security Annotations
+include::topics/4768.adoc[leveloffset=+3]
+
+// Use EJB Security Annotations
+include::topics/4795.adoc[leveloffset=+3]
+
+=== Remote Access to EJBs
+// About Remote Method Access
+//include::topics/7882.adoc[leveloffset=+3]
+
+// About Remoting Callbacks
+//include::topics/7883.adoc[leveloffset=+3]
+
+// About Remoting Server Detection
+//include::topics/7890.adoc[leveloffset=+3]
+
+// Configure the Remoting Subsystem
+//include::topics/7884.adoc[leveloffset=+3]
+
+// Use Security Realms with Remote EJB Clients
+include::topics/8270.adoc[leveloffset=+3]
+
+// Add a New Security Realm
+include::topics/8272.adoc[leveloffset=+3]
+
+// Add a User to a Security Realm
+include::topics/8271.adoc[leveloffset=+3]
+
+// Assigning a Security Realm to an EJB
+include::topics/assigning-security-realm-to-ejb.adoc[leveloffset=+3]
+
+// About Remote EJB Access Using SSL Encryption
+include::topics/4786.adoc[leveloffset=+3]
+
+// Elytron Integration with the EJB Subsystem
+include::topics/elytron-ejb-subsystem.adoc[leveloffset=+2]
+
+== Container and Client Interceptors
+// About Container Interceptors
+include::topics/13885.adoc[leveloffset=+2]
+
+// Create a Container Interceptor Class
+include::topics/13887.adoc[leveloffset=+2]
+
+// Configure a Container Interceptor
+include::topics/13886.adoc[leveloffset=+2]
+
+// Change the Security Context Identity
+include::topics/13166.adoc[leveloffset=+2]
+
+// Configure a Client Interceptor for Use by an Application
+include::topics/14138.adoc[leveloffset=+2]
+
+== Clustered Enterprise JavaBeans
+
+// About Clustered Enterprise JavaBeans (EJBs)
+include::topics/4663.adoc[leveloffset=+2]
+
+//Marking an EJB as clustered - this topic is no more needed for EAP 7 (JBEAP-1684)
+// include::topics/marking_an_ejb_as_clustered.adoc[leveloffset=+2]
+
+// EJB Client Code Simplification
+include::topics/ejb-client-code-simplification.adoc[leveloffset=+2]
+
+// Deploying clustered EJBs
+include::topics/deploying_clustered_ejbs.adoc[leveloffset=+2]
+
+// Failover for clustered EJBs
+include::topics/failover_for_clustered_ejbs.adoc[leveloffset=+2]
+
+// Remote standalone clients
+include::topics/remote_standalone_clients.adoc[leveloffset=+2]
+
+// Cluster topology communication
+include::topics/cluster_topology_communication.adoc[leveloffset=+2]
+
+// Automatic Transaction Stickiness for EJBs
+include::topics/automatic-transaction-stickiness-for-ejbs.adoc[leveloffset=+2]
+
+// Remote clients on another instance
+include::topics/remote_clients_on_another_instance.adoc[leveloffset=+2]
+
+// Standalone and In-server Client Configuration
+include::topics/40832.adoc[leveloffset=+2]
+
+// Implementing a Custom Load Balancing Policy for EJB Calls
+include::topics/40838.adoc[leveloffset=+2]
+
+// EJB Transactions in a Clustered Environment
+include::topics/ejb-transactions-in-a-clustered-environment.adoc[leveloffset=+2]
+
+// Implement an HA Singleton
+// include::topics/9154-OBSOLETE.adoc[leveloffset=+2]
+// include::topics/ha-singleton.adoc[leveloffset=+2]
+
+// Tuning the EJB 3 Subsystem
+include::topics/ejb-guide-tuning.adoc[leveloffset=+1]
+
+[appendix]
+== Reference Material
+
+// EJB JNDI Naming Reference
+include::topics/5119.adoc[leveloffset=+2]
+
+// EJB Reference Resolution
+include::topics/4543.adoc[leveloffset=+2]
+
+// Project dependencies for Remote EJB Clients
+include::topics/5726.adoc[leveloffset=+2]
+
+// jboss-ejb3.xml Deployment Descriptor Reference
+include::topics/9019.adoc[leveloffset=+2]
+
+// Configure an EJB Thread Pool
+include::topics/5743.adoc[leveloffset=+2]
+
+// **********************************
+// * Appendix: Revision Information *
+// **********************************
+include::topics/templates/revision-info.adoc[]

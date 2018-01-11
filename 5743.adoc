@@ -1,0 +1,69 @@
+[[configure_ejb_thread_pool]]
+= Configure an EJB Thread Pool
+
+You can create an EJB thread pool using the management console or the management CLI.
+
+[discrete]
+== Configure an EJB Thread Pool Using the Management Console
+
+. Log in to the management console.
+. Click on the *Configuration* tab. Expand the *Subsystems* menu.
+. Select *EJB 3* and then click *View*.
+. Select the *Container* tab and then click *Thread Pools*.
+. Click *Add*. The *Create THREAD-POOL* dialog appears.
+. Specify the required details, *Name* and *Max threads* value.
+. Click *Save*.
+
+[discrete]
+== Configure an EJB Thread Pool Using the Management CLI
+
+Use the `add` operation with the following syntax:
+[options="nowrap",subs="+quotes"]
+----
+/subsystem=ejb3/thread-pool=__THREAD_POOL_NAME__:add(max-threads=__MAX_SIZE__)
+----
+
+* Replace `__THREAD_POOL_NAME__` with the required name for the thread pool.
+* Replace `__MAX_SIZE__` with the maximum size of the thread pool.
+
+Use the `read-resource` operation to confirm the creation of the bean
+pool:
+[options="nowrap",subs="+quotes"]
+----
+/subsystem=ejb3/thread-pool=__THREAD_POOL_NAME__:read-resource
+----
+
+To reconfigure all the services in the `ejb3` subsystem to use a new thread pool, use the following commands:
+[options="nowrap"]
+----
+/subsystem=ejb3/thread-pool=bigger:add(max-threads=100)
+/subsystem=ejb3/service=async:write-attribute(name=thread-pool-name, value="bigger")
+/subsystem=ejb3/service=remote:write-attribute(name=thread-pool-name, value="bigger")
+/subsystem=ejb3/service=timer-service:write-attribute(name=thread-pool-name, value="bigger")
+reload
+----
+
+XML Configuration Sample:
+[options="nowrap"]
+----
+<subsystem xmlns="urn:jboss:domain:ejb3:4.0">
+    ...
+    <async thread-pool-name="bigger"/>
+    ...
+    <timer-service thread-pool-name="bigger" default-data-store="default-file-store">
+    ...
+    <remote connector-ref="http-remoting-connector" thread-pool-name="bigger"/>
+    ...
+    <thread-pools>
+        <thread-pool name="default">
+            <max-threads count="10"/>
+            <keepalive-time time="100" unit="milliseconds"/>
+        </thread-pool>
+        <thread-pool name="bigger">
+            <max-threads count="100"/>
+        </thread-pool>
+    </thread-pools>
+    ...
+----
+[NOTE]
+`keepalive-time` should not be used as it is not effective.

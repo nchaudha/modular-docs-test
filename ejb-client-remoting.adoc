@@ -1,0 +1,36 @@
+[[ejb_client_remoting_interoperability]]
+= EJB Client Remoting Interoperability
+
+The default remote connection port is `8080`. The `jboss-ejb-client` properties file looks like this:
+
+[options="nowrap"]
+----
+remote.connectionprovider.create.options.org.xnio.Options.SSL_ENABLED=false
+remote.connections=default
+remote.connection.default.host=localhost
+remote.connection.default.port=8080
+remote.connection.default.connect.options.org.xnio.Options.SASL_POLICY_NOANONYMOUS=false
+----
+
+[discrete]
+== Default Connector
+
+The default connector is `http-remoting`.
+
+* If a client application uses the EJB client library from {ProductShortName} {ProductPreviousRelease} and wants to connect to a {ProductShortName} {ProductRelease} server, the server must be configured to expose a remoting connector on a port other than `8080`. The client must then connect using that newly configured connector.
+
+* A client application that uses the EJB client library from {ProductShortName} {ProductRelease} and wants to connect to a {ProductShortName} {ProductPreviousRelease} server must be aware that the server instance does not use the `http-remoting` connector and instead uses a `remoting` connector. This is achieved by defining a new client-side connection property.
++
+[options="nowrap"]
+----
+remote.connection.default.protocol=remote
+----
+
+[NOTE]
+====
+EJB remote calls are supported for {ProductShortName} {ProductRelease} with {ProductShortName} {ProductPreviousRelease} only.
+====
+
+Besides EJB client remoting interoperability, you can connect to legacy clients using the following options:
+
+* link:{LinkConfigGuide}#configure_the_orb_for_jts_transactions[Configure the ORB for JTS Transactions] in the {ProductShortName} _Configuration Guide_.

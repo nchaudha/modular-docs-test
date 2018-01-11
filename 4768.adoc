@@ -1,0 +1,13 @@
+[[about_ejb_security_annotations]]
+= About EJB Security Annotations
+
+EJB `javax.annotation.security` annotations are defined in link:https://jcp.org/en/jsr/detail?id=250[JSR-250].
+
+EJBs use security annotations to pass information about security to the
+deployer. These include:
+
+@DeclareRoles::
+  Declares which roles are available.
+
+@RunAs::
+  Configures the propagated security identity of a component.

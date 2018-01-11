@@ -1,0 +1,10 @@
+[[automatic_transaction_stickiness_for_ejbs]]
+= Automatic Transaction Stickiness for EJBs
+
+A transaction object, which is looked up from the same context as the EJB proxy, targets the same host. Having an active transaction pins the invocation context to the same node, if the context is multi-host or clustered.
+
+This behavior depends on whether you have outflowed your transaction or you are using a remote user transaction.
+
+For an outflowed transaction, when an application is looked up on a specific node, all the invocations to that application under the same transaction attempt to target this node. The nodes that have already received the outflowed transaction will be preferred over nodes that have not received it yet.
+
+For a remote user transaction, the first successful invocation will lock the transaction to the given node, and subsequent invocations under this transaction must go to the same node, otherwise an exception is thrown.

@@ -1,0 +1,27 @@
+[[ejb_reference_resolution]]
+= EJB Reference Resolution
+
+This section covers how {ProductShortName} implements `@EJB` and `@Resource`. Please note that XML always overrides annotations but the same rules apply.
+
+Rules for the @EJB annotation::
+
+* The `@EJB` annotation also has a `mappedName()` attribute. The
+specification leaves this as vendor specific metadata, but {ProductShortName}
+recognizes `mappedName()` as the global JNDI name of the EJB you are
+referencing. If you have specified a `mappedName()`, then all other
+attributes are ignored and this global JNDI name is used for binding.
+* If you specify `@EJB` with no attributes defined:
++
+[source,java,options="nowrap"]
+----
+@EJB
+ProcessPayment myEjbref;
+----
++
+Then the following rules apply:
+
+** The EJB jar of the referencing bean is searched for an EJB with the interface used in the `@EJB` injection. If there are more than one EJB that publishes same business interface, then an exception is thrown. If there is only one bean with that interface then that one is used.
+** Search the EAR for EJBs that publish that interface. If there are duplicates, then an exception is thrown. Otherwise the matching bean is returned.
+** Search globally in {ProductShortName} runtime for an EJB of that interface. Again, if duplicates are found, an exception is thrown.
+
+* `@EJB.beanName()` corresponds to `<ejb-link>`. If the `beanName()` is defined, then use the same algorithm as `@EJB` with no attributes defined except use the `beanName()` as a key in the search. An exception to this rule is if you use the ejb-link *#* syntax: it allows you to put a relative path to a jar in the EAR where the EJB you are referencing is located. Refer to the EJB 3.2 specification for more details.

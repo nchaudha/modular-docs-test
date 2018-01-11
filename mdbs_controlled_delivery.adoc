@@ -1,0 +1,8 @@
+[[mdbs_controlled_delivery]]
+= Message-Driven Beans Controlled Delivery
+
+{ProductShortName} provides three attributes that control active reception of messages on a specific MDB:
+
+* xref:configure_delivery_active[Delivery Active]
+* xref:delivery_groups[Delivery Groups]
+* xref:clustered_singleton_mdbs[Clustered Singleton MDBs]

@@ -1,0 +1,139 @@
+[[jboss_ejb3_xml_deployment_descriptor_reference]]
+= jboss-ejb3.xml Deployment Descriptor Reference
+
+`jboss-ejb3.xml` is a custom deployment descriptor that can be used in either EJB JAR or WAR archives. In an EJB JAR archive it must be located in the `META-INF/` directory. In a WAR archive it must be located in the `WEB-INF/` directory.
+
+The format is similar to `ejb-jar.xml`, using some of the same
+namespaces and providing some other additional namespaces. The contents of `jboss-ejb3.xml` are merged with the contents of `ejb-jar.xml`, with the `jboss-ejb3.xml` items taking precedence.
+
+This document only covers the additional non-standard namespaces used by `jboss-ejb3.xml`. See http://java.sun.com/xml/ns/javaee/[] for documentation on the standard namespaces.
+
+The root namespace is http://www.jboss.com/xml/ns/javaee.
+
+Assembly descriptor namespaces::
+The following namespaces can all be used in the `<assembly-descriptor>` element. They can be used to apply their configuration to a single bean, or to all beans in the deployment by using a wildcard (`*`) as the `ejb-name`.
+
+The clustering namespace: `urn:clustering:1.0`::
++
+[source,xml,options="nowrap"]
+----
+xmlns:c="urn:clustering:1.0"
+----
++
+This allows you to mark EJB's as clustered. It is the deployment descriptor equivalent to `@org.jboss.ejb3.annotation.Clustered`.
++
+[source,xml,options="nowrap"]
+----
+<c:clustering>
+   <ejb-name>DDBasedClusteredSFSB</ejb-name>
+   <c:clustered>true</c:clustered>
+</c:clustering>
+----
+The security namespace (`urn:security`)::
++
+[source,xml,options="nowrap"]
+----
+xmlns:s="urn:security"
+----
++
+This allows you to set the `security-domain` and the `run-as-principal` for an EJB.
++
+[source,xml,options="nowrap"]
+----
+<s:security>
+  <ejb-name>*</ejb-name>
+  <s:security-domain>myDomain</s:security-domain>
+  <s:run-as-principal>myPrincipal</s:run-as-principal>
+</s:security>
+----
+The resource adapter namespace: `urn:resource-adapter-binding`::
++
+[source,xml,options="nowrap"]
+----
+xmlns:r="urn:resource-adapter-binding"
+----
++
+This allows you to set the resource adapter for a Message-Driven Bean.
++
+[source,xml,options="nowrap"]
+----
+<r:resource-adapter-binding>
+  <ejb-name>*</ejb-name>
+  <r:resource-adapter-name>myResourceAdapter</r:resource-adapter-name>
+</r:resource-adapter-binding>
+----
+The IIOP namespace: `urn:iiop`::
++
+[source,xml,options="nowrap"]
+----
+xmlns:u="urn:iiop"
+----
++
+The IIOP namespace is where IIOP settings are configured.
+
+The pool namespace: `urn:ejb-pool:1.0`::
++
+[source,xml,options="nowrap"]
+----
+xmlns:p="urn:ejb-pool:1.0"
+----
++
+This allows you to select the pool that is used by the included stateless session beans or Message-Driven Beans. Pools are defined in the server configuration.
++
+[source,xml,options="nowrap"]
+----
+<p:pool>
+   <ejb-name>*</ejb-name>
+   <p:bean-instance-pool-ref>my-pool</p:bean-instance-pool-ref>
+</p:pool>
+----
+The cache namespace: `urn:ejb-cache:1.0`::
++
+[source,xml,options="nowrap"]
+----
+xmlns:c="urn:ejb-cache:1.0"
+----
++
+This allows you to select the cache that is used by the included stateful session beans. Caches are defined in the server configuration.
++
+[source,xml,options="nowrap"]
+----
+<c:cache>
+   <ejb-name>*</ejb-name>
+   <c:cache-ref>my-cache</c:cache-ref>
+</c:cache>
+----
++
+[source,xml,options="nowrap"]
+----
+<?xml version="1.1" encoding="UTF-8"?>
+<jboss:ejb-jar xmlns:jboss="http://www.jboss.com/xml/ns/javaee"
+    xmlns="http://java.sun.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:c="urn:clustering:1.0"
+    xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd"
+    version="3.1"
+    impl-version="2.0">
+  <enterprise-beans>
+     <message-driven>
+        <ejb-name>ReplyingMDB</ejb-name>
+        <ejb-class>org.jboss.as.test.integration.ejb.mdb.messagedestination.ReplyingMDB</ejb-class>
+        <activation-config>
+           <activation-config-property>
+              <activation-config-property-name>destination</activation-config-property-name>
+              <activation-config-property-value>java:jboss/mdbtest/messageDestinationQueue
+              </activation-config-property-value>
+           </activation-config-property>
+        </activation-config>
+     </message-driven>
+  </enterprise-beans>
+  <assembly-descriptor>
+     <c:clustering>
+        <ejb-name>DDBasedClusteredSFSB</ejb-name>
+        <c:clustered>true</c:clustered>
+     </c:clustering>
+  </assembly-descriptor>
+</jboss:ejb-jar>
+----
+
+NOTE: There are known issues with the `jboss-ejb3-spec-2_0.xsd` file that may result in schema validation errors. You can ignore these errors. For more information, see https://bugzilla.redhat.com/show_bug.cgi?id=1192591.

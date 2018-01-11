@@ -1,0 +1,29 @@
+[[ejb_3_2_feature_set]]
+= EJB 3.2 Feature Set
+
+The following EJB 3.2 features are supported by {ProductShortName} {ProductRelease}:
+
+* Session beans
+* Message-driven beans
+* EJB API groups
+* No-interface views
+* Local interfaces
+* Remote interfaces
+* AutoClosable interface
+* Timer service
+* Asynchronous calls
+* Interceptors
+* RMI/IIOP interoperability
+* Transaction support
+* Security
+* Embeddable API
+
+The following features are no longer supported by {ProductShortName} {ProductRelease}:
+
+* EJB 2.1 entity bean client views 
+* Entity beans with bean-managed persistence
+* Entity beans with container-managed persistence
+* EJB Query Language (EJB QL)
+* JAX-RPC based web services: endpoints and client views
+
+

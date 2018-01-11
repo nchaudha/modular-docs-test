@@ -1,0 +1,14 @@
+[[about_ejb_client_contexts]]
+= About EJB Client Contexts
+
+{ProductShortName} introduced the EJB client API for managing remote EJB
+invocations. The JBoss EJB client API uses the EJBClientContext, which may be associated with and be used by one or more threads concurrently. The means an EJBClientContext can potentially contain any number of EJB receivers. An EJB receiver is a component that knows how to communicate with a server that is capable of handling the EJB invocation. Typically, EJB remote applications can be classified into the following:
+
+* A remote client, which runs as a standalone Java application.
+* A remote client, which runs within another {ProductShortName} instance.
+
+Depending on the type of remote client, from an EJB client API point of view, there can potentially be more than one EJBClientContext within a JVM.
+
+While standalone applications typically have a single EJBClientContext that may be backed by any number of EJB receivers, this isn't mandatory. If a standalone application has more than one EJBClientContext, an EJB client context selector is responsible for returning the appropriate context.
+
+In case of remote clients that run within another {ProductShortName} instance, each deployed application will have a corresponding EJB client context. Whenever that application invokes another EJB, the corresponding EJB client context is used to find the correct EJB receiver, which then handles the invocation.

@@ -1,0 +1,83 @@
+[[configure_a_container_interceptor]]
+= Configure a Container Interceptor
+
+Container interceptors use the standard Java EE interceptor libraries, meaning they use the same XSD elements that are allowed in `ejb-jar.xml` file for the 3.2 version of the ejb-jar deployment descriptor. Because they are based on the standard Java EE interceptor libraries, container interceptors may only be configured using deployment descriptors. This was done by design so applications would not require any JBoss specific annotation or other library dependencies. For more information about container interceptors, see xref:about_container_interceptors[About Container Interceptors].
+
+The following procedure describes how to configure a container interceptor.
+
+. Create a `jboss-ejb3.xml` file in the `META-INF/` directory of the EJB deployment.
+
+. Configure the container interceptor elements in the descriptor file.
+
+.. Use the `urn:container-interceptors:1.0` namespace to specify configuration of container interceptor elements.
+
+.. Use the `<container-interceptors>` element to specify the container interceptors.
+
+.. Use the `<interceptor-binding>` elements to bind the container interceptor to the EJBs. The interceptors can be bound in any of the following ways:
+
+* Bind the interceptor to all the EJBs in the deployment using a wildcard ([x-]`*`).
+
+* Bind the interceptor at the individual bean level using the specific EJB name.
+
+* Bind the interceptor at the specific method level for the EJBs.
++
+[NOTE]
+====
+These elements are configured using the EJB 3.2 XSD in the same way it is done for Java EE interceptors.
+====
++
+. Review the following descriptor file for examples of the above elements.
++
+.Container Interceptor `jboss-ejb3.xml` File Example
+[source,xml,options="nowrap"]
+----
+<jboss xmlns="http://www.jboss.com/xml/ns/javaee"
+       xmlns:jee="http://java.sun.com/xml/ns/javaee"
+       xmlns:ci ="urn:container-interceptors:1.0">
+
+    <jee:assembly-descriptor>
+        <ci:container-interceptors>
+            <!-- Default interceptor -->
+            <jee:interceptor-binding>
+                <ejb-name>*</ejb-name>
+                <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.ContainerInterceptorOne</interceptor-class>
+            </jee:interceptor-binding>
+            <!-- Class level container-interceptor -->
+            <jee:interceptor-binding>
+                <ejb-name>AnotherFlowTrackingBean</ejb-name>
+                <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.ClassLevelContainerInterceptor</interceptor-class>
+            </jee:interceptor-binding>
+            <!-- Method specific container-interceptor -->
+            <jee:interceptor-binding>
+                <ejb-name>AnotherFlowTrackingBean</ejb-name>
+                <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.MethodSpecificContainerInterceptor</interceptor-class>
+                <method>
+                    <method-name>echoWithMethodSpecificContainerInterceptor</method-name>
+                </method>
+            </jee:interceptor-binding>
+            <!-- container interceptors in a specific order -->
+            <jee:interceptor-binding>
+                <ejb-name>AnotherFlowTrackingBean</ejb-name>
+                <interceptor-order>
+                    <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.ClassLevelContainerInterceptor</interceptor-class>
+                    <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.MethodSpecificContainerInterceptor</interceptor-class>
+                    <interceptor-class>org.jboss.as.test.integration.ejb.container.interceptor.ContainerInterceptorOne</interceptor-class>
+                </interceptor-order>
+                <method>
+                    <method-name>echoInSpecificOrderOfContainerInterceptors</method-name>
+                </method>
+            </jee:interceptor-binding>
+        </ci:container-interceptors>
+    </jee:assembly-descriptor>
+</jboss>
+----
+
+The `allow-ejb-name-regex` attribute allows you to use regular expressions in interceptor bindings and maps the interceptors to all the beans that match the specified regular expression. Use the following management CLI command to enable the `allow-ejb-name-regex` attribute of the `ejb3` subsystem to `true`:
+
+[source,options="nowrap"]
+----
+/subsystem=ejb3:write-attribute(name=allow-ejb-name-regex,value=true)
+----
+
+
+The schema for the `urn:container-interceptors:1.0` namespace is available at http://www.jboss.org/schema/jbossas/jboss-ejb-container-interceptors_1_0.xsd.

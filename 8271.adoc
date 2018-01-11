@@ -1,0 +1,10 @@
+[[add_a_user_to_a_security_realm]]
+= Add a User to a Security Realm
+
+. Run the `add-user` script. Open a terminal and change directories to the `__EAP_HOME__/bin/` directory. If you are on Red Hat Enterprise Linux or any other UNIX-like operating system, run `add-user.sh`. If you are on Windows Server, run `add-user.bat`.
+
+. Choose whether to add a management user or application user. For this procedure, type `b` to add an application user.
+
+. Choose the realm the user will be added to. By default, the only available realm is `ApplicationRealm`. If you have added a custom realm, you may add the user to that instead.
+
+. Type the username, password, and roles, when prompted. Type the desired username, password, and optional roles when prompted. Verify your choice by typing `yes`, or type `no` to cancel the changes. The changes are written to each of the properties files for the security realm.

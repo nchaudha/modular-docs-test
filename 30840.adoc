@@ -1,0 +1,218 @@
+[[enable_ejb_and_mdb_property_substitution_in_an_application]]
+= Enable EJB and MDB Property Substitution in an Application
+
+{ProductName} allows you to enable property substitution in EJBs and MDBs using the `@ActivationConfigProperty` and `@Resource` annotations.
+Property substitution requires the following configuration and code changes.
+
+* You must xref:configure_the_server_to_enable_property_substitution[enable property substitution] in the {ProductShortName} server configuration file.
+* You must xref:define_the_system_properties_for_the_mdb[define the system properties] in the server configuration file or pass them as arguments when you start the {ProductShortName} server.
+* You must xref:modify_the_application_code_to_use_the_system_property_substitutions[modify the application code] to use the substitution variables.
+
+The following examples demonstrate how to modify the `helloworld-mdb` quickstart that ships with {ProductShortName} to use property substitution. See the `helloworld-mdb-propertysubstitution` quickstart for the completed working example.
+
+[[configure_the_server_to_enable_property_substitution]]
+== Configure the Server to Enable Property Substitution
+
+To enable property substitution in the {ProductShortName} server, you must set the `annotation-property-replacement` attribute in the `ee` subsystem of the server configuration to `true`.
+
+. Back up the server configuration file.
++
+The `helloworld-mdb-propertysubstitution` quickstart example requires the full profile for a standalone server, so this is the `__EAP_HOME__/standalone/configuration/standalone-full.xml` file.
+If you are running your server in a managed domain, this is the `__EAP_HOME__/domain/configuration/domain.xml` file.
+
+. Navigate to the {ProductShortName} install directory and start the server with the full profile.
++
+[options="nowrap",subs="+quotes"]
+----
+$ __EAP_HOME__/bin/standalone.sh -c standalone-full.xml
+----
++
+NOTE: For Windows Server, use the `__EAP_HOME__\bin\standalone.bat` script.
++
+. Launch the management CLI.
++
+[options="nowrap",subs="+quotes"]
+----
+$ __EAP_HOME__/bin/jboss-cli.sh --connect
+----
++
+NOTE: For Windows Server, use the `__EAP_HOME__\bin\jboss-cli.bat` script.
+
+. Type the following command to enable annotation property substitution.
++
+----
+/subsystem=ee:write-attribute(name=annotation-property-replacement,value=true)
+----
++
+You should see the following result.
++
+----
+{"outcome" => "success"}
+----
+. Review the changes to the {ProductShortName} server configuration file.
+The `ee` subsystem should now contain the following XML.
++
+.Example `ee` Subsystem Configuration
+[source,xml,options="nowrap"]
+----
+<subsystem xmlns="urn:jboss:domain:ee:4.0">
+  ...
+  <annotation-property-replacement>true</annotation-property-replacement>
+  ...
+</subsystem>
+----
+
+[[define_the_system_properties_for_the_mdb]]
+== Define the System Properties
+
+You can specify the system properties in the server configuration file or you can pass them as command line arguments when you start the {ProductShortName} server. System properties defined in the server configuration file take precedence over those passed on the command line when you start the server.
+
+=== Define the System Properties in the Server Configuration
+
+. Launch the management CLI.
+
+. Use the following command syntax to configure a system property in the {ProductShortName} server.
++
+.Syntax to Add a System Property
+[source,options="nowrap",subs="+quotes"]
+----
+/system-property=__PROPERTY_NAME__:add(value=__PROPERTY_VALUE__)
+----
++
+The following system properties are configured for the `helloworld-mdb-propertysubstitution` quickstart.
++
+.Example Commands to Add System Properties
+[source,options="nowrap"]
+----
+/system-property=property.helloworldmdb.queue:add(value=java:/queue/HELLOWORLDMDBPropQueue)
+/system-property=property.helloworldmdb.topic:add(value=java:/topic/HELLOWORLDMDBPropTopic)
+/system-property=property.connection.factory:add(value=java:/ConnectionFactory)
+----
+
+. Review the changes to the {ProductShortName} server configuration file. The following system properties should now appear in the after the `<extensions>`.
++
+.Example System Properties Configuration
+[source,xml,options="nowrap"]
+----
+<system-properties>
+    <property name="property.helloworldmdb.queue" value="java:/queue/HELLOWORLDMDBPropQueue"/>
+    <property name="property.helloworldmdb.topic" value="java:/topic/HELLOWORLDMDBPropTopic"/>
+    <property name="property.connection.factory" value="java:/ConnectionFactory"/>
+</system-properties>
+----
+
+=== Pass the System Properties as Arguments on Server Start
+
+If you prefer, you can instead pass the arguments on the command line when you start the {ProductShortName} server in the form of `-D__PROPERTY_NAME__=__PROPERTY_VALUE__`.
+The following is an example of how to pass the arguments for the system properties defined in the previous section.
+
+.Example Server Start Command Passing System Properties
+[options="nowrap",subs="+quotes"]
+----
+$ __EAP_HOME__/bin/standalone.sh -c standalone-full.xml  -Dproperty.helloworldmdb.queue=java:/queue/HELLOWORLDMDBPropQueue  -Dproperty.helloworldmdb.topic=java:/topic/HELLOWORLDMDBPropTopic  -Dproperty.connection.factory=java:/ConnectionFactory
+----
+
+[[modify_the_application_code_to_use_the_system_property_substitutions]]
+== Modify the Application Code to Use the System Property Substitutions
+
+Replace the hard-coded `@ActivationConfigProperty` and `@Resource` annotation values with substitutions for the newly defined system properties. The following are examples of how to change the `helloworld-mdb` quickstart to use the newly defined system property
+substitutions.
+
+. Change the `@ActivationConfigProperty` `destination` property value in the `HelloWorldQueueMDB` class to use the substitution for the system property. The `@MessageDriven` annotation should now look like this:
++
+.HelloWorldQueueMDB Code Example
+[source,java,options="nowrap"]
+----
+@MessageDriven(name = "HelloWorldQueueMDB", activationConfig = {
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${property.helloworldmdb.queue}"),
+    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Queue"),
+    @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+----
+
+. Change the `@ActivationConfigProperty` `destination` property value in the `HelloWorldTopicMDB` class to use the substitution for the system property. The `@MessageDriven` annotation should now look like this:
++
+.HelloWorldTopicMDB Code Example
+[source,java,options="nowrap"]
+----
+@MessageDriven(name = "HelloWorldQTopicMDB", activationConfig = {
+    @ActivationConfigProperty(propertyName = "destinationLookup", propertyValue = "${property.helloworldmdb.topic}"),
+    @ActivationConfigProperty(propertyName = "destinationType", propertyValue = "javax.jms.Topic"),
+    @ActivationConfigProperty(propertyName = "acknowledgeMode", propertyValue = "Auto-acknowledge") })
+----
+
+. Change the `@Resource` annotations in the `HelloWorldMDBServletClient` class to use the system property substitutions. The code should now look like this:
++
+.HelloWorldMDBServletClient Code Example
+[source,java,options="nowrap"]
+----
+/**
+ * Definition of the two JMS destinations used by the quickstart
+ * (one queue and one topic).
+ */
+ @JMSDestinationDefinitions(
+     value = {
+         @JMSDestinationDefinition(
+             name = "java:/${property.helloworldmdb.queue}",
+             interfaceName = "javax.jms.Queue",
+             destinationName = "HelloWorldMDBQueue"
+         ),
+         @JMSDestinationDefinition(
+             name = "java:/${property.helloworldmdb.topic}",
+             interfaceName = "javax.jms.Topic",
+             destinationName = "HelloWorldMDBTopic"
+         )
+     })
+/**
+ * <p>
+ * A simple servlet 3 as client that sends several messages to a queue or a topic.
+ * </p>
+ *
+ * <p>
+ * The servlet is registered and mapped to /HelloWorldMDBServletClient using the {@linkplain WebServlet
+ * @HttpServlet}.
+ * </p>
+ *
+ * @author Serge Pagop (spagop@redhat.com)
+ *
+ */
+@WebServlet("/HelloWorldMDBServletClient")
+public class HelloWorldMDBServletClient extends HttpServlet {
+
+    private static final long serialVersionUID = -8314035702649252239L;
+
+    private static final int MSG_COUNT = 5;
+
+    @Inject
+    private JMSContext context;
+
+    @Resource(lookup = "${property.helloworldmdb.queue}")
+    private Queue queue;
+
+    @Resource(lookup = "${property.helloworldmdb.topic}")
+    private Topic topic;
+
+  <!-- Remainder of code can be found in the `helloworld-mdb-propertysubstitution` quickstart. -->
+----
+
+. Modify the `activemq-jms.xml` file to use the system property
+substitution values.
++
+.Example .activemq-jms.xml File
+[source,xml,options="nowrap"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<messaging-deployment xmlns="urn:jboss:messaging-activemq-deployment:1.0">
+    <server>
+         <jms-destinations>
+            <jms-queue name="HELLOWORLDMDBQueue">
+                <entry name="${property.helloworldmdb.queue}"/>
+            </jms-queue>
+            <jms-topic name="HELLOWORLDMDBTopic">
+                <entry name="${property.helloworldmdb.topic}"/>
+            </jms-topic>
+        </jms-destinations>
+    </server>
+</messaging-deployment>
+----
++
+. Deploy the application. The application now uses the values specified by the system properties for the `@Resource` and `@ActivationConfigProperty` property values.

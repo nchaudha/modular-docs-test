@@ -1,0 +1,60 @@
+[[set_the_security_identity_of_an_ejb]]
+= Set the Security Identity of an EJB
+
+The security identity of the EJB is specified through the `<security-identity>` tag in the security configuration. If no `<security-identity>` tag is present, the caller identity of the EJB is used by default.
+
+.Example: Set the Security Identity of an EJB to Be the Same as Its Caller
+This example sets the security identity for method invocations made by an EJB to be the same as the current caller's identity. This behavior is the default if you do not specify a `<security-identity>` element declaration.
+
+[source,xml,options="nowrap"]
+----
+<ejb-jar>
+  <enterprise-beans>
+     <session>
+        <ejb-name>ASessionBean</ejb-name>
+        ...
+        <security-identity>
+          <use-caller-identity/>
+        </security-identity>
+     </session>
+     ...
+  </enterprise-beans>
+</ejb-jar>
+----
+
+.Example: Set the Security Identity of an EJB to a Specific Role
+To set the security identity to a specific role, use the `<run-as>` and `<role-name>` tags inside the `<security-identity>` tag.
+[source,xml,options="nowrap"]
+----
+<ejb-jar>
+  <enterprise-beans>
+     <session>
+        <ejb-name>RunAsBean</ejb-name>
+        ...
+        <security-identity>
+          <run-as>
+             <description>A private internal role</description>
+             <role-name>InternalRole</role-name>
+          </run-as>
+        </security-identity>
+     </session>
+  </enterprise-beans>
+  ...
+</ejb-jar>
+----
+
+By default, when you use `<run-as>`, a principal named `anonymous` is assigned to outgoing calls. To assign a different principal, uses the `<run-as-principal>`.
+[source,xml,options="nowrap"]
+----
+<session>
+    <ejb-name>RunAsBean</ejb-name>
+    <security-identity>
+        <run-as-principal>internal</run-as-principal>
+    </security-identity>
+</session>
+----
+
+[NOTE]
+====
+You can also use the `<run-as>` and `<run-as-principal>` elements inside a servlet element.
+====

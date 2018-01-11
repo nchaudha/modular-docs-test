@@ -1,0 +1,59 @@
+[[use_a_client_interceptor_in_an_application]]
+= Use a Client Interceptor in an Application
+
+An application can insert a client interceptor into the `EJBClientContext`  interceptor chain either programmatically or by using the service loader mechanism.
+
+== Insert the Interceptor Programmatically
+
+You must create an `EJBClientContext` with the interceptor registered.
+
+[source,java,options="nowrap"]
+----
+EJBClientContext ctxWithInterceptors = EJBClientContext.getCurrent().withAddedInterceptors(clientInterceptor);
+----
+
+Once you have created the `EJBClientContext`, there are two ways to insert the interceptor:
+
+* You can run the following code with `EJBClientContext` applied using a `Callable` operation. EJB calls performed within the `Callable` operation will apply the client-side interceptors:
++
+[source,java,options="nowrap"]
+----
+ctxWithInterceptors.runCallable(() -> {
+    // perform the calls which should use the interceptor
+})
+----
+
+* Alternatively you can mark the newly created `EJBClientContext` as the new default:
++
+[source,java,options="nowrap"]
+----
+EJBClientContext.getContextManager().setThreadDefault(ctxWithInterceptors);
+----
+
+== Insert the Interceptor Using the Service Loader Mechanism
+
+Create a `META-INF/services/org.jboss.ejb.client.EJBClientInterceptor` file and place or package it in the class path of the client application. The rules for the file are dictated by the
+http://docs.oracle.com/javase/6/docs/api/java/util/ServiceLoader.html[Java ServiceLoader Mechanism].
+
+* This file is expected to contain a separate line for each fully qualified class name of the EJB client interceptor implementation.
+* The EJB client interceptor classes must be available in the class path.
+
+EJB client interceptors that are added using the service loader mechanism are added in the order they are found in the class path and are added to the end of the client interceptor chain. The `ejb-security-interceptors` quickstart that ships with {ProductName} uses this approach.
+
+[[insert_interceptor_using_client_interceptor_annotation]]
+== Insert the Interceptor Using the ClientInterceptors Annotation
+
+The `@org.jboss.ejb.client.annnotation.ClientInterceptors` annotation allows you to place the EJB interceptor in the client-side of the remote call:
+
+[source,java,options="nowrap"]
+----
+import org.jboss.ejb.client.annotation.ClientInterceptors;
+@ClientInterceptors({HelloClientInterceptor.class})
+
+public interface HelloBeanRemote {
+   public String hello();
+}
+----
+
+
+

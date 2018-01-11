@@ -1,0 +1,11 @@
+[[ejb_client_code_simplification]]
+= EJB Client Code Simplification
+
+You can simplify the EJB client code when invoking the EJB server-side clustered components. The following procedures outline the multiple ways to simplify the EJB client code:
+
+* xref:initial_context_lookup[Initial Context Lookup]
+* xref:remote_ejb_configuration_file[Remote EJB Configuration File]
+* xref:automatic_transaction_stickiness_for_ejbs[Automatic Transaction Stickiness for EJBs]
+* xref:ejb_transactions_in_a_clustered_environment[EJB Transactions in a Clustered Environment]
+
+NOTE: The use of the `jboss-ejb-client.properties` file is deprecated in favor of the `wildfly-config.xml` file.

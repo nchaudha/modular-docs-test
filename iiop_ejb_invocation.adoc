@@ -1,0 +1,146 @@
+[[configure_iiop_for_remote_ejb_calls]]
+= Configure IIOP for Remote EJB Calls
+
+JBoss EAP supports CORBA/IIOP-based access to EJBs deployed on JBoss EAP.
+
+The `<iiop>` element is used to enable IIOP, CORBA, invocation of EJBs. The presence of this element means that the `iiop-openjdk` subsystem is installed. The `<iiop>` element includes the following two attributes:
+
+* `enable-by-default`: If this is `true`, then all the EJBs with EJB 2.x home interfaces are exposed through IIOP. Otherwise they must be explicitly enabled through `jboss-ejb3.xml`.
+
+* `use-qualified-name`: If this is `true`, then the EJBs are bound to the CORBA naming context with a binding name that contains the application and modules name of the deployment, such as `myear/myejbjar/MyBean`. If this is `false`, then the default binding name is simply the bean name.
+
+[IMPORTANT]
+====
+IIOP calls can be done only with EJB 2 beans. EJB 3 beans are not supported by IIOP in {ProductShortName} {ProductVersion}.
+====
+
+[discrete]
+== Enabling IIOP
+
+To enable IIOP you must have the IIOP OpenJDK ORB subsystem installed, and the `<iiop/>` element present in the `ejb3` subsystem configuration. The `standalone-full.xml` configuration that comes with the distribution has both of these enabled.
+
+IIOP is configured in the `iiop-openjdk` subsystem of the server configuration file.
+
+[source,xml,options="nowrap"]
+----
+<subsystem xmlns="urn:jboss:domain:iiop-openjdk:1.0">
+----
+
+Use the following management CLI command to access and update the `iiop-openjdk` subsystem.
+----
+/subsystem=iiop-openjdk
+----
+
+The IIOP element takes two attributes that control the default behavior of the server.
+
+[source,xml,options="nowrap"]
+----
+<subsystem xmlns="urn:jboss:domain:ejb3:1.2">
+  ...
+  <iiop enable-by-default="false" use-qualified-name="false"/>
+  ...
+</subsystem>
+----
+
+The following management CLI command adds the `<iiop>` element under the `ejb3` subsystem:
+----
+/subsystem=ejb3/service=iiop:add(enable-by-default=false, use-qualified-name=false)
+----
+
+[discrete]
+== Create an EJB That Communicates Using IIOP
+
+The following example demonstrates how to make a remote IIOP call from the client:
+
+. Create an EJB 2 bean on the server:
++
+[source,java,options="nowrap"]
+----
+@Remote(IIOPRemote.class)
+@RemoteHome(IIOPBeanHome.class)
+@Stateless
+public class IIOPBean {
+    public String sayHello() throws RemoteException {
+         return "hello";
+    }
+}
+----
++
+. Create a home implementation, which has a mandatory method `create()`. This method is called by the client to obtain proxy of remote interface to invoke business methods:
++
+[source,java,options="nowrap"]
+----
+public interface IIOPBeanHome extends EJBHome {
+    public IIOPRemote create() throws RemoteException;
+}
+----
++
+. Create a remote interface for remote connection to the EJB:
++
+[source,java,options="nowrap"]
+----
+public interface IIOPRemote extends EJBObject {
+    String sayHello() throws RemoteException;
+}
+----
++
+. Introduce the bean for remote call by creating a descriptor file `jboss-ejb3.xml` in `META-INF`:
++
+[source,xml,options="nowrap"]
+----
+<?xml version="1.0" encoding="UTF-8"?>
+<jboss:ejb-jar xmlns:jboss="http://www.jboss.com/xml/ns/javaee"
+               xmlns="http://java.sun.com/xml/ns/javaee"
+               xmlns:iiop="urn:iiop"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://www.jboss.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-2_0.xsd
+                  http://java.sun.com/xml/ns/javaee http://www.jboss.org/j2ee/schema/jboss-ejb3-spec-2_0.xsd
+                  urn:iiop jboss-ejb-iiop_1_0.xsd"
+               version="3.1"
+               impl-version="2.0">
+    <assembly-descriptor>
+        <iiop:iiop>
+            <ejb-name>*</ejb-name>
+        </iiop:iiop>
+    </assembly-descriptor>
+</jboss:ejb-jar>
+----
++
+[NOTE]
+====
+The packed beans along with the descriptor in the JAR file is now ready to be deployed to the {ProductShortName} container.
+====
++
+. Create a context at the client side:
++
+[source,java,options="nowrap"]
+----
+System.setProperty("com.sun.CORBA.ORBUseDynamicStub", "true");
+final Properties props = new Properties();
+props.put(Context.PROVIDER_URL, "corbaloc::localhost:3528/JBoss/Naming/root");
+props.setProperty(Context.URL_PKG_PREFIXES, "org.jboss.iiop.naming:org.jboss.naming.client");
+props.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.cosnaming.CNCtxFactory");
+props.put(Context.OBJECT_FACTORIES, "org.jboss.tm.iiop.client.IIOPClientUserTransactionObjectFactory");
+----
++
+[NOTE]
+====
+The client will need to have the `wildfly iiop openjdk` library added to its class path. The client might also need to add the `org.wildfly:wildfly-iiop-openjdk` artifact as Maven dependency.
+====
++
+. Use the context lookup to narrow the reference to the `IIOPBeanHome` home interface. Then call the home interface `create()` method to access the remote interface, which allows you to call its methods:
++
+[source,java,options="nowrap"]
+----
+try {
+    Context context = new InitialContext(props);
+
+    final Object iiopObj = context.lookup(IIOPBean.class.getSimpleName());
+    final IIOPBeanHome beanHome = (IIOPBeanHome) PortableRemoteObject.narrow(iiopObj, IIOPBeanHome.class);
+    final IIOPRemote bean = beanHome.create();
+
+    System.out.println("Bean saying: " + bean.sayHello());
+} catch (Exception e) {
+    e.printStackTrace();
+}
+----

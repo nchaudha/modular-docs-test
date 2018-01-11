@@ -1,0 +1,37 @@
+[[specifying_a_resource_adapter_in_jboss_ejb3_xml_for_an_mdb]]
+= Specifying a Resource Adapter in `jboss-ejb3.xml` for an MDB
+
+In the `jboss-ejb3.xml` deployment descriptor you can specify a resource adapter for an MDB to use.
+
+To specify a resource adapter in `jboss-ejb3.xml` for an MDB, use the following example.
+
+.Example: jboss-ejb3.xml Configuration for an MDB Resource Adapter
+[source,xml,options="nowrap"]
+----
+<jboss xmlns="http://www.jboss.com/xml/ns/javaee"
+  xmlns:jee="http://java.sun.com/xml/ns/javaee"
+  xmlns:mdb="urn:resource-adapter-binding">
+  <jee:assembly-descriptor>  
+    <mdb:resource-adapter-binding>  
+      <jee:ejb-name>MyMDB</jee:ejb-name>  
+      <mdb:resource-adapter-name>MyResourceAdapter.rar</mdb:resource-adapter-name>  
+    </mdb:resource-adapter-binding>  
+  </jee:assembly-descriptor>
+</jboss>
+----
+
+For a resource adapter located in an EAR, you must use the following
+syntax for `<mdb:resource-adapter-name>`:
+
+* For a resource adapter that is in another EAR:
++
+[source,xml,options="nowrap"]
+----
+<mdb:resource-adapter-name>OtherDeployment.ear#MyResourceAdapter.rar</mdb:resource-adapter-name>
+----
+* For a resource adapter that is in the same EAR as the MDB, you can omit the EAR name:
++
+[source,xml,options="nowrap"]
+----
+<mdb:resource-adapter-name>#MyResourceAdapter.rar</mdb:resource-adapter-name>
+----

@@ -1,0 +1,82 @@
+[[project_dependencies_for_remote_ejb_clients]]
+= Project Dependencies for Remote EJB Clients
+
+Maven projects that include the invocation of session beans from remote
+clients require the following dependencies from the {ProductShortName} Maven repository. There are two ways to declare EJB client dependencies, as described in the sub-sections below.
+
+[NOTE]
+====
+The `artifactId` versions are subject to change. See the https://maven.repository.redhat.com/ga/[{ProductShortName} Maven
+Repository] for the latest versions.
+====
+
+[discrete]
+== Maven Dependencies for Remote EJB Clients
+
+The `jboss-eap-javaee7` Bill of Materials (BOM) packages the correct version of many of the artifacts commonly required by a  {ProductShortName} application. The BOM dependency is specified in the `<dependencyManagement>` section of the `pom.xml` with the scope of `import`.
+
+.Example: POM File `<dependencyManagement>` Section
+[source,xml,options="nowrap"]
+----
+<dependencyManagement>
+   <dependencies>
+      <dependency>
+      <groupId>org.jboss.bom</groupId>
+        <artifactId>jboss-eap-javaee7</artifactId>
+        <version>${version.jboss.bom.eap}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+   </dependencies>
+</dependencyManagement>
+----
+
+The remaining dependencies are specified in the `<dependencies>` section of the `pom.xml` file.
+
+.Example: POM File `<dependencies>` Section
+[source,xml,options="nowrap"]
+----
+<dependencies>
+    <!-- Include the EJB client JARs -->
+    <dependency>
+        <groupId>org.jboss.eap</groupId>
+        <artifactId>wildfly-ejb-client-bom</artifactId>
+        <type>pom</type>
+    </dependency>
+
+    <!-- Include any additional dependencies required by the application
+        ...
+    -->
+
+</dependencies>
+----
+
+The `ejb-remote` quickstart that ships with {ProductShortName} provides a complete working example of remote EJB client application. See the `client/pom.xml` file located in root directory of that quickstart for a complete example of dependency configuration for remote session bean invocation.
+
+[discrete]
+== Single artifactID for jboss-ejb-client Dependencies
+
+You can use the `wildfly-ejb-client-bom` `artifactID` and add the `jboss-ejb-client` library to include all the required dependencies for EJB clients:
+
+[source,xml,options="nowrap",subs="+quotes"]
+----
+<dependencyManagement>
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss.eap</groupId>
+            <artifactId>wildfly-ejb-client-bom</artifactId>
+            <version>__EJB_CLIENT_BOM_VERSION__</version>
+            <type>pom</type>
+            <scope>import</scope>
+        </dependency>
+    </dependencies>
+</dependencyManagement>
+<dependencies>
+    <dependency>
+        <groupId>org.jboss</groupId>
+        <artifactId>jboss-ejb-client</artifactId>
+    </dependency>
+</dependencies>
+----
+
+You must use the __EJB_CLIENT_BOM_VERSION__ that is available in the {ProductShortName} Maven repository.

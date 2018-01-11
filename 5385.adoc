@@ -1,0 +1,58 @@
+[[create_an_ejb_archive_project_using_red_hat_jboss_developer_studio]]
+= Create an EJB Archive Project Using Red Hat JBoss Developer Studio
+
+This task describes how to create an Enterprise JavaBeans (EJB) project in Red Hat JBoss Developer Studio.
+
+[discrete]
+== Prerequisites
+
+* A server and server runtime for {ProductShortName} have been configured in JBoss Developer Studio.
+// TODO: See link:{LinkDevelopmentGuide}#add_the_jboss_eap_server_to_red_hat_jboss_developer_studio[Add the {ProductShortName} Server to JBoss Developer Studio] in the link:{LinkDevelopmentGuide}[Development Guide].
+
+[discrete]
+[[create_an_ejb_project_in_jbds]]
+== Create an EJB Project in Red Hat JBoss Developer Studio
+
+. Open the *New EJB Project* wizard.
++
+.. Navigate to the *File* menu, select *New*, then select *Project*.
+.. When the *New Project* wizard appears, select *EJB/EJB Project* and click *Next*.
++
+.New EJB Project Wizard
+image::6585.png[New EJB Project Wizard]
+
+. Enter the following details:
+
+** *Project name:* The name of the project that appears in Red Hat JBoss Developer Studio, and also the default file name for the deployed JAR file.
+** *Project location:* The directory where the project files will be saved. The default is a directory in the current workspace.
+** *Target runtime:* This is the server runtime used for the project. This will need to be set to the same *{ProductShortName}* runtime used by the server that you will be deploying to.
+** *EJB module version:* This is the version of the EJB specification that your enterprise beans will comply with. Red Hat recommends using *3.2*.
+** *Configuration:* This allows you to adjust the supported features in your project. Use the default configuration for your selected runtime.
++
+Click *Next* to continue.
+
+. The *Java* project configuration screen allows you to add directories containing Java source files and specify the directory for the output of the build.
++
+Leave this configuration unchanged and click *Next*.
+
+. In the *EJB Module* settings screen, check *Generate ejb-jar.xml deployment descriptor* if a deployment descriptor is required. The deployment descriptor is optional in EJB 3.2 and can be added later if required.
++
+Click *Finish* and the project is created and will be displayed in the Project Explorer.
++
+.Newly Created EJB Project in the Project Explorer
+image::47.png[Newly created EJB Project in the Project Explorer]
+
+. To add the project to the server for deployment, right-click on the target server in the *Server* tab and choose *Add and Remove*.
++
+In the *Add and Remove* dialog, select the resource to deploy from the *Available* column and click the *Add* button. The resource will be moved to the *Configured* column. Click *Finish* to close the dialog.
++
+.Add and Remove Dialog
+image::48.png[Add and Remove Dialog]
+
+
+You now have an EJB project in Red Hat JBoss Developer Studio that can build and deploy to the specified server.
+
+[WARNING]
+====
+If no enterprise beans are added to the project then Red Hat JBoss Developer Studio will display the warning stating *_An EJB module must contain one or more enterprise beans._* This warning will disappear once one or more enterprise beans have been added to the project.
+====

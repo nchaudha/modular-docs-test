@@ -1,0 +1,51 @@
+[[add_session_beans_to_a_project_in_red_hat_jboss_developer_studio]]
+= Add Session Beans to a Project in Red Hat JBoss Developer Studio
+
+Red Hat JBoss Developer Studio has several wizards that can be used to quickly create enterprise bean classes. The following procedure shows how to use the Red Hat JBoss Developer Studio wizards to add a session bean to a project.
+
+[discrete]
+== Prerequisites
+
+* You have a EJB or Dynamic Web Project in Red Hat JBoss Developer Studio to which you want to add one or more session beans.
+
+[discrete]
+== Add Session Beans to a Project in Red Hat JBoss Developer Studio
+
+. Open the project in Red Hat JBoss Developer Studio.
+
+. Open the Create EJB 3.x Session Bean wizard.
++
+To open the *Create EJB 3.x Session Bean wizard*, navigate to the *File* menu, select *New* and then select *Session Bean (EJB 3.x)*.
++
+.Create EJB 3.x Session Bean wizard
+image::44.png[Create EJB 3.x Session Bean wizard]
+
+. Specify following details:
++
+** *Project:* Verify the correct project is selected.
+** *Source folder:* This is the folder that the Java source files will be created in. This should not usually need to be changed.
+** *Package:* Specify the package that the class belongs to.
+** *Class name:* Specify the name of the class that will be the session bean.
+** *Superclass:* The session bean class can inherit from a superclass. Specify that here if your session has a superclass.
+** *State type:* Specify the state type of the session bean: stateless, stateful or singleton.
+** *Business interfaces:* By default the *No-interface* box is checked so no interfaces will be created. Check the boxes for the interfaces you wish to define and adjust the names if necessary.
++
+Remember that enterprise beans in a web archive (WAR) only support EJB 3.2 Lite and this does not include remote business interfaces.
++
+Click *Next*.
+
+. You can enter in additional information here to further customize the session bean. It is not required to change any of the information here.
++
+Items that you can change are:
++
+** Bean name
+** Mapped name
+** Transaction type (container managed or bean managed)
+** Additional interfaces can be supplied that the bean must implement
+** You can also specify EJB 2.x Home and Component interfaces if
+required
+
+. Click *Finish* and the new session bean will be created and added to the project. The files for any new business interfaces will also be created if they were specified.
++
+.New Session Bean in Red Hat JBoss Developer Studio
+image::45.png[New Session Bean in Red Hat JBoss Developer Studio]

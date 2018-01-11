@@ -1,0 +1,4 @@
+[[stateful_session_beans]]
+= Stateful Session Beans
+
+Stateful session beans are enterprise beans that provide business methods to client applications and maintain conversational state with the client. They should be used for tasks that must be done in several steps, or method calls, each of which relies on the state of the previous step being maintained. The application server ensures that each client receives the same instance of a stateful session bean for each method call.
